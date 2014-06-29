@@ -5,7 +5,8 @@ local paddle_1 = {}
 local paddle_2 = {}
 
 -- this is the centre
-local ball_r = 15
+local ball = {}
+ball.r = 15
 
 -- radians
 local random_angle = 0.1
@@ -41,9 +42,9 @@ function collision(paddle)
 
    local collision = false
 
-   local dist_fromline = math.abs(a * ball_x + b * ball_y + c) / math.sqrt(a * a + b * b)
-   if dist_fromline < ball_r then
-      local dist_fromcentre = math.sqrt((paddle.x - ball_x) ^ 2 + (paddle.y - ball_y) ^ 2)
+   local dist_fromline = math.abs(a * ball.x + b * ball.y + c) / math.sqrt(a * a + b * b)
+   if dist_fromline < ball.r then
+      local dist_fromcentre = math.sqrt((paddle.x - ball.x) ^ 2 + (paddle.y - ball.y) ^ 2)
       if dist_fromcentre < paddle_h / 2 then
 	 collision = true
       end
@@ -89,13 +90,13 @@ end
 
 function restart()
    -- ball in the centre
-   ball_x = (min_of_game + max_of_game) / 2
-   ball_y = height / 2
+   ball.x = (min_of_game + max_of_game) / 2
+   ball.y = height / 2
 
    -- points per second
-   ball_speed = 200
+   ball.speed = 200
 
-   ball_angle = (math.random() - 0.5) * math.pi / 2
+   ball.angle = (math.random() - 0.5) * math.pi / 2
 
    paddle_1.collision = false
    paddle_2.collision = false
@@ -112,10 +113,10 @@ function love.load()
 
    love.keyboard.setKeyRepeat(true)
 
-   ball_min_x = min_of_game + ball_r
-   ball_max_x = max_of_game - ball_r
-   ball_min_y = ball_r
-   ball_max_y = height - ball_r
+   ball.min_x = min_of_game + ball.r
+   ball.max_x = max_of_game - ball.r
+   ball.min_y = ball.r
+   ball.max_y = height - ball.r
 
    paddle_min_y = 0
    paddle_max_y = height
@@ -129,20 +130,19 @@ end
 
 
 function love.update(dt)
-   dx = math.cos(ball_angle) * ball_speed
-   dy = math.sin(ball_angle) * ball_speed
+   dx = math.cos(ball.angle) * ball.speed
+   dy = math.sin(ball.angle) * ball.speed
 
-   ball_x = ball_x + dx * dt
-   ball_y = ball_y + dy * dt
+   ball.x = ball.x + dx * dt
+   ball.y = ball.y + dy * dt
 
    if auto_play then
       -- this line makes it plays automatically
-      -- paddle_2.y = ball_y
-      paddle_1.y = ball_y
+      -- paddle_2.y = ball.y
+      paddle_1.y = ball.y
    else
       paddle_1.x = paddle_1.x + paddle_1.coeff_x * paddle_1.speed_x * dt
       paddle_1.y = paddle_1.y + paddle_1.coeff_y * paddle_1.speed_y * dt
-      paddle_1.x = math.min(paddle_1.x, width / 2)
       paddle_1.x = bound(paddle_1.x, min_of_game, width / 2)
       paddle_1.y = bound(paddle_1.y, paddle_min_y, paddle_max_y)
    end
@@ -157,21 +157,21 @@ function love.update(dt)
    paddle_2.y = bound(paddle_2.y, paddle_min_y, paddle_max_y)
 
    if collision(paddle_2) then
-      ball_angle = bounce(ball_angle, paddle_2.angle, random_angle)
+      ball.angle = bounce(ball.angle, paddle_2.angle, random_angle)
    elseif collision(paddle_1) then
-      ball_angle = bounce(ball_angle, paddle_1.angle, random_angle)
-   elseif ball_x > ball_max_x then
+      ball.angle = bounce(ball.angle, paddle_1.angle, random_angle)
+   elseif ball.x > ball.max_x then
       points_1 = points_1 + 1
       restart()
-   elseif ball_x < ball_min_x then
+   elseif ball.x < ball.min_x then
       points_2 = points_2 + 1
       restart()
    end
 
-   if ball_y < ball_min_y or ball_y > ball_max_y then
+   if ball.y < ball.min_y or ball.y > ball.max_y then
       -- no random angle added here
-      ball_angle = bounce(ball_angle, 0, 0)
-      ball_y = bound(ball_y, ball_min_y, ball_max_y)
+      ball.angle = bounce(ball.angle, 0, 0)
+      ball.y = bound(ball.y, ball.min_y, ball.max_y)
    end
 
 end
@@ -188,7 +188,7 @@ function love.draw()
 
    if help_play then
       love.graphics.setColor(255, 218, 185)
-      love.graphics.line(ball_x, ball_y, ball_x + dx * 1, ball_y + dy * 1)
+      love.graphics.line(ball.x, ball.y, ball.x + dx * 1, ball.y + dy * 1)
    end
 
    -- court lines
@@ -219,7 +219,7 @@ function love.draw()
    -- ball
 
    love.graphics.setColor(204, 204, 0)
-   love.graphics.circle('fill', ball_x, ball_y, ball_r, 10)
+   love.graphics.circle('fill', ball.x, ball.y, ball.r, 10)
 
    love.graphics.setColor(123, 204, 40)
    love.graphics.print(points_1 .. " : " .. points_2, 300, 300)
@@ -237,9 +237,9 @@ function love.keypressed(key)
       paddle_1.angle = paddle_1.angle - 0.1
 
    elseif key == "up" then
-      ball_speed = ball_speed + 10
+      ball.speed = ball.speed + 10
    elseif key == "down" then
-      ball_speed = ball_speed - 10
+      ball.speed = ball.speed - 10
    elseif key == "q" then
       scene_angle = scene_angle + 0.1
    elseif key == "w" then
