@@ -57,7 +57,6 @@ function setup()
    -- 100 pixels are the "goal" zone on each side
    min_of_game = 100
    max_of_game = width - min_of_game
-   scene_angle = 0
 
    local paddle_h = 100
 
@@ -226,11 +225,6 @@ end
 
 
 function love.draw()
-   -- rotate around the center of the screen by angle radians
-   love.graphics.translate(width / 2, height / 2)
-   love.graphics.rotate(scene_angle)
-   love.graphics.translate(-width / 2, -height / 2)
-
    love.graphics.setBackgroundColor(0, 0, 200)
 
    if help_play then
@@ -268,10 +262,6 @@ function love.keypressed(key)
       ball.speed = ball.speed + 10
    elseif key == "down" then
       ball.speed = ball.speed - 10
-   elseif key == "q" then
-      scene_angle = scene_angle + 0.1
-   elseif key == "w" then
-      scene_angle = scene_angle - 0.1
    elseif key == "a" then
       auto_play = not auto_play
    elseif key == "h" then
