@@ -83,9 +83,15 @@ function setup()
    player_1.height = paddle_h
    player_1.width = 10
 
-   player_1.coeff_x = 0
-   player_1.coeff_y = 0
    player_1.angle = math.pi / 2
+
+   player_1.keys = {}
+   player_1.keys.up = "w"
+   player_1.keys.down = "s"
+   player_1.keys.left = "a"
+   player_1.keys.right = "d"
+   player_1.keys.clock = "x"
+   player_1.keys.anti = "z"
 
    -- player 2
    player_2.points = 0
@@ -102,9 +108,15 @@ function setup()
    player_2.height = paddle_h
    player_2.width = -10
 
-   player_2.coeff_x = 0
-   player_2.coeff_y = 0
    player_2.angle = math.pi / 2
+
+   player_2.keys = {}
+   player_2.keys.up = "i"
+   player_2.keys.down = "k"
+   player_2.keys.left = "j"
+   player_2.keys.right = "l"
+   player_2.keys.clock = "m"
+   player_2.keys.anti = "n"
 
    restart()
 end
@@ -144,8 +156,26 @@ end
 
 
 function player_update(player, dt)
-   player.x = player.x + player.coeff_x * player.speed_x * dt
-   player.y = player.y + player.coeff_y * player.speed_y * dt
+   local coeff_x = 0
+   local coeff_y = 0
+
+   if joystick then
+      coeff_x = joystick:getAxis(1)
+      coeff_y = joystick:getAxis(2)
+      player.angle = (joystick:getAxis(3) * 0.9 + 1) * math.pi / 2
+
+   elseif love.keyboard.isDown(player.keys.up) then
+      coeff_y = -1
+   elseif love.keyboard.isDown(player.keys.down) then
+      coeff_y = 1
+   elseif love.keyboard.isDown(player.keys.left) then
+      coeff_x = -1
+   elseif love.keyboard.isDown(player.keys.right) then
+      coeff_x = 1
+   end
+
+   player.x = player.x + coeff_x * player.speed_x * dt
+   player.y = player.y + coeff_y * player.speed_y * dt
    player.x = bound(player.x, player.min_x, player.max_x)
    player.y = bound(player.y, player.min_y, player.max_y)
 end
@@ -192,12 +222,6 @@ function love.update(dt)
       player_1.y = ball.y
    else
       player_update(player_1, dt)
-   end
-
-   if joystick then
-      player_2.coeff_x = joystick:getAxis(1)
-      player_2.coeff_y = joystick:getAxis(2)
-      player_2.angle = (joystick:getAxis(3) * 0.9 + 1) * math.pi / 2
    end
 
    player_update(player_2, dt)
@@ -249,32 +273,23 @@ end
 
 
 function love.keypressed(key)
-   if key == "e" then
-      player_1.coeff_y = -1
-   elseif key == "d" then
-      player_1.coeff_y = 1
-   elseif key =="k" then
+   if key == player_1.keys.clock then
       player_1.angle = player_1.angle + 0.1
-   elseif key =="l" then
+   elseif key ==  player_1.keys.anti then
       player_1.angle = player_1.angle - 0.1
+   elseif key == player_2.keys.clock then
+      player_2.angle = player_2.angle + 0.1
+   elseif key ==  player_2.keys.anti then
+      player_2.angle = player_2.angle - 0.1
 
    elseif key == "up" then
       ball.speed = ball.speed + 10
    elseif key == "down" then
       ball.speed = ball.speed - 10
-   elseif key == "a" then
+   elseif key == "q" then
       auto_play = not auto_play
    elseif key == "h" then
       help_play = not help_play
-   end
-end
-
-
-function love.keyreleased(key)
-   if key == "e" then
-      player_1.coeff_y = 0
-   elseif key == "d" then
-      player_1.coeff_y = 0
    end
 end
 
