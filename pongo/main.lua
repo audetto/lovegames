@@ -1,11 +1,12 @@
 local Player = require "player"
+local Ball = require "ball"
 
 -- this is the top left
 local player_1 = Player.new({})
 local player_2 = Player.new({})
 
 -- this is the centre
-local ball = {}
+local ball = Ball.new({})
 
 -- radians
 local random_angle = 0.1
@@ -38,7 +39,7 @@ end
 
 -- the collision is only wrt the main side of the paddle
 -- so we are checking intersection between a segment of a line and a circle
-function collision(player)
+function collision(ball, player)
    local m = math.tan(player.angle)
    local a = -m
    local b = 1
@@ -154,12 +155,6 @@ function restart()
 end
 
 
-function ball_draw(ball)
-   love.graphics.setColor(ball.color)
-   love.graphics.circle('fill', ball.x, ball.y, ball.r, 10)
-end
-
-
 function court_draw()
    love.graphics.setColor(255, 255, 0)
    love.graphics.line(min_of_game, 0, min_of_game, height)
@@ -189,8 +184,7 @@ end
 
 
 function love.update(dt)
-   ball.x = ball.x + ball.speed.x * dt
-   ball.y = ball.y + ball.speed.y * dt
+   ball:update(dt)
 
    if auto_play then
       -- this line makes it plays automatically
@@ -202,9 +196,9 @@ function love.update(dt)
 
    player_2:update(dt)
 
-   if collision(player_2) then
+   if collision(ball, player_2) then
       bounce(ball, player_2.angle, random_angle)
-   elseif collision(player_1) then
+   elseif collision(ball, player_1) then
       bounce(ball, player_1.angle, random_angle)
    elseif ball.x > ball.max_x then
       player_1.points = player_1.points + 1
@@ -220,7 +214,6 @@ function love.update(dt)
       ball.speed.y = -ball.speed.y
       ball.y = bound(ball.y, ball.min_y, ball.max_y)
    end
-
 end
 
 
@@ -241,7 +234,7 @@ function love.draw()
    player_2:draw()
 
    -- ball
-   ball_draw(ball)
+   ball:draw()
 
    -- points
    love.graphics.setColor(123, 204, 40)
@@ -254,10 +247,8 @@ function love.keypressed(key)
       return
    elseif not player_2:keypressed(key) then
       return
-   elseif key == "up" then
-      ball.speed = ball.speed + 10
-   elseif key == "down" then
-      ball.speed = ball.speed - 10
+   elseif not ball:keypressed(key) then
+      return
    elseif key == "q" then
       auto_play = not auto_play
    elseif key == "h" then
