@@ -16,19 +16,23 @@ local auto_play = false
 local help_play = false
 
 
-function bounce(ball, wall_angle, random_angle)
+function bounce(ball, player, random_angle)
+   -- first calculate ball speed wrt player
+   local relative_x = ball.speed.x - player.speed.x * player.affect_ball
+   local relative_y = ball.speed.y - player.speed.y * player.affect_ball
+
    -- compute current speed and angle
-   local ball_angle = math.atan2(ball.speed.y, ball.speed.x)
-   local ball_speed = math.sqrt(ball.speed.x ^ 2 + ball.speed.y ^ 2)
+   local ball_angle = math.atan2(relative_y, relative_x)
+   local ball_speed = math.sqrt(relative_x ^ 2 + relative_y ^ 2)
 
    -- bounce
-   local new_angle = -ball_angle + 2 * wall_angle
+   local new_angle = -ball_angle + 2 * player.angle
    local extra = (math.random() - 0.5) * random_angle
    new_angle = new_angle + extra
 
-   -- reapply same speed to new angle
-   ball.speed.x = ball_speed * math.cos(new_angle)
-   ball.speed.y = ball_speed * math.sin(new_angle)
+   -- reapply same speed to new angle + player speed
+   ball.speed.x = ball_speed * math.cos(new_angle) + player.speed.x * player.affect_ball
+   ball.speed.y = ball_speed * math.sin(new_angle) + player.speed.y * player.affect_ball
 end
 
 
@@ -84,11 +88,13 @@ function setup()
    -- player 1
    player_1.points = 0
    player_1.color = {255, 0, 0}
+   player_1.affect_ball = 0
 
    player_1.x = min_of_game
    player_1.y = height / 2
-   player_1.speed_x = 200
-   player_1.speed_y = 500
+   player_1.speed = {}
+   player_1.speed.x = 0
+   player_1.speed.y = 0
 
    player_1.min_y = 0
    player_1.max_y = height
@@ -106,15 +112,18 @@ function setup()
    player_1.keys.right = "d"
    player_1.keys.clock = "x"
    player_1.keys.anti = "z"
+   player_1.keys.affect = "c"
 
    -- player 2
    player_2.points = 0
    player_2.color = {255, 255, 0}
+   player_2.affect_ball = 0
 
    player_2.x = max_of_game
    player_2.y = height / 2
-   player_2.speed_x = 200
-   player_2.speed_y = 500
+   player_2.speed = {}
+   player_2.speed.x = 0
+   player_2.speed.y = 0
    player_2.min_y = 0
    player_2.max_y = height
    player_2.min_x = width / 2
@@ -131,6 +140,7 @@ function setup()
    player_2.keys.right = "l"
    player_2.keys.clock = "m"
    player_2.keys.anti = "n"
+   player_2.keys.affect = "p"
 
    restart()
 end
@@ -143,7 +153,7 @@ function restart()
 
    -- points per second
    local ball_speed = 200
-   local ball_angle = (math.random() - 0.5) * math.pi / 2
+   local ball_angle = (math.random() - 0.5) * math.pi / 2 * 0
 
    ball.speed.x = ball_speed * math.cos(ball_angle)
    ball.speed.y = ball_speed * math.sin(ball_angle)
@@ -179,7 +189,7 @@ function love.load()
    love.graphics.setFont(font)
 
    local joysticks = love.joystick.getJoysticks()
-   joystick = joysticks[1]
+   player_2.joystick = joysticks[1]
 end
 
 
@@ -197,9 +207,9 @@ function love.update(dt)
    player_2:update(dt)
 
    if collision(ball, player_2) then
-      bounce(ball, player_2.angle, random_angle)
+      bounce(ball, player_2, random_angle)
    elseif collision(ball, player_1) then
-      bounce(ball, player_1.angle, random_angle)
+      bounce(ball, player_1, random_angle)
    elseif ball.x > ball.max_x then
       player_1.points = player_1.points + 1
       restart()

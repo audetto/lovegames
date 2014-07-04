@@ -10,14 +10,16 @@ local function player_draw(self)
 end
 
 local function player_update(self, dt)
+   local speed_target_x = 100
+   local speed_target_y = 100
+
    local coeff_x = 0
    local coeff_y = 0
 
-   if joystick then
-      coeff_x = joystick:getAxis(1)
-      coeff_y = joystick:getAxis(2)
-      self.angle = (joystick:getAxis(3) * 0.9 + 1) * math.pi / 2
-
+   if self.joystick then
+      coeff_x = self.joystick:getAxis(1)
+      coeff_y = self.joystick:getAxis(2)
+      self.angle = (self.joystick:getAxis(3) * 0.9 + 1) * math.pi / 2
    elseif love.keyboard.isDown(self.keys.up) then
       coeff_y = -1
    elseif love.keyboard.isDown(self.keys.down) then
@@ -28,8 +30,11 @@ local function player_update(self, dt)
       coeff_x = 1
    end
 
-   self.x = self.x + coeff_x * self.speed_x * dt
-   self.y = self.y + coeff_y * self.speed_y * dt
+   self.speed.x = coeff_x * speed_target_x
+   self.speed.y = coeff_y * speed_target_y
+
+   self.x = self.x + self.speed.x * dt
+   self.y = self.y + self.speed.y * dt
    self.x = bound(self.x, self.min_x, self.max_x)
    self.y = bound(self.y, self.min_y, self.max_y)
 end
@@ -39,6 +44,8 @@ local function player_keypressed(self, key)
       self.angle = self.angle + 0.1
    elseif key == self.keys.anti then
       self.angle = self.angle - 0.1
+   elseif key == self.keys.affect then
+      self.affect_ball = 1 - self.affect_ball
    else
       return true
    end
