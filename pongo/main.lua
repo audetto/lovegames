@@ -1,6 +1,8 @@
+local Player = require "player"
+
 -- this is the top left
-local player_1 = {}
-local player_2 = {}
+local player_1 = Player.new({})
+local player_2 = Player.new({})
 
 -- this is the centre
 local ball = {}
@@ -145,42 +147,6 @@ function ball_draw(ball)
 end
 
 
-function player_draw(player)
-   love.graphics.setColor(player.color)
-   love.graphics.push()
-   love.graphics.translate(player.x, player.y)
-   love.graphics.rotate(player.angle)
-   love.graphics.rectangle('fill', -player.height / 2, 0, player.height, player.width)
-   love.graphics.pop()
-end
-
-
-function player_update(player, dt)
-   local coeff_x = 0
-   local coeff_y = 0
-
-   if joystick then
-      coeff_x = joystick:getAxis(1)
-      coeff_y = joystick:getAxis(2)
-      player.angle = (joystick:getAxis(3) * 0.9 + 1) * math.pi / 2
-
-   elseif love.keyboard.isDown(player.keys.up) then
-      coeff_y = -1
-   elseif love.keyboard.isDown(player.keys.down) then
-      coeff_y = 1
-   elseif love.keyboard.isDown(player.keys.left) then
-      coeff_x = -1
-   elseif love.keyboard.isDown(player.keys.right) then
-      coeff_x = 1
-   end
-
-   player.x = player.x + coeff_x * player.speed_x * dt
-   player.y = player.y + coeff_y * player.speed_y * dt
-   player.x = bound(player.x, player.min_x, player.max_x)
-   player.y = bound(player.y, player.min_y, player.max_y)
-end
-
-
 function court_draw()
    love.graphics.setColor(255, 255, 0)
    love.graphics.line(min_of_game, 0, min_of_game, height)
@@ -221,10 +187,10 @@ function love.update(dt)
       -- player_2.y = ball.y
       player_1.y = ball.y
    else
-      player_update(player_1, dt)
+      player_1:update(dt)
    end
 
-   player_update(player_2, dt)
+   player_2:update(dt)
 
    if collision(player_2) then
       ball.angle = bounce(ball.angle, player_2.angle, random_angle)
@@ -260,8 +226,8 @@ function love.draw()
    court_draw()
 
    -- players
-   player_draw(player_1)
-   player_draw(player_2)
+   player_1:draw()
+   player_2:draw()
 
    -- ball
    ball_draw(ball)
@@ -273,15 +239,10 @@ end
 
 
 function love.keypressed(key)
-   if key == player_1.keys.clock then
-      player_1.angle = player_1.angle + 0.1
-   elseif key ==  player_1.keys.anti then
-      player_1.angle = player_1.angle - 0.1
-   elseif key == player_2.keys.clock then
-      player_2.angle = player_2.angle + 0.1
-   elseif key ==  player_2.keys.anti then
-      player_2.angle = player_2.angle - 0.1
-
+   if not player_1:keypressed(key) then
+      return
+   elseif not player_2:keypressed(key) then
+      return
    elseif key == "up" then
       ball.speed = ball.speed + 10
    elseif key == "down" then
