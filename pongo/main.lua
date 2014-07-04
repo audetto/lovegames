@@ -15,11 +15,19 @@ local auto_play = false
 local help_play = false
 
 
-function bounce(angle, wall, random_angle)
-   local a = -angle + 2 * wall
+function bounce(ball, wall_angle, random_angle)
+   -- compute current speed and angle
+   local ball_angle = math.atan2(ball.speed.y, ball.speed.x)
+   local ball_speed = math.sqrt(ball.speed.x ^ 2 + ball.speed.y ^ 2)
+
+   -- bounce
+   local new_angle = -ball_angle + 2 * wall_angle
    local extra = (math.random() - 0.5) * random_angle
-   a = a + extra
-   return a
+   new_angle = new_angle + extra
+
+   -- reapply same speed to new angle
+   ball.speed.x = ball_speed * math.cos(new_angle)
+   ball.speed.y = ball_speed * math.sin(new_angle)
 end
 
 
@@ -68,6 +76,9 @@ function setup()
    ball.max_x = max_of_game - ball.r
    ball.min_y = ball.r
    ball.max_y = height - ball.r
+   ball.speed = {}
+   ball.speed.x = 0
+   ball.speed.y = 0
 
    -- player 1
    player_1.points = 0
@@ -130,9 +141,11 @@ function restart()
    ball.y = height / 2
 
    -- points per second
-   ball.speed = 200
+   local ball_speed = 200
+   local ball_angle = (math.random() - 0.5) * math.pi / 2
 
-   ball.angle = (math.random() - 0.5) * math.pi / 2
+   ball.speed.x = ball_speed * math.cos(ball_angle)
+   ball.speed.y = ball_speed * math.sin(ball_angle)
 
    -- reset collision
    player_1.collision = false
@@ -176,11 +189,8 @@ end
 
 
 function love.update(dt)
-   dx = math.cos(ball.angle) * ball.speed
-   dy = math.sin(ball.angle) * ball.speed
-
-   ball.x = ball.x + dx * dt
-   ball.y = ball.y + dy * dt
+   ball.x = ball.x + ball.speed.x * dt
+   ball.y = ball.y + ball.speed.y * dt
 
    if auto_play then
       -- this line makes it plays automatically
@@ -193,9 +203,9 @@ function love.update(dt)
    player_2:update(dt)
 
    if collision(player_2) then
-      ball.angle = bounce(ball.angle, player_2.angle, random_angle)
+      bounce(ball, player_2.angle, random_angle)
    elseif collision(player_1) then
-      ball.angle = bounce(ball.angle, player_1.angle, random_angle)
+      bounce(ball, player_1.angle, random_angle)
    elseif ball.x > ball.max_x then
       player_1.points = player_1.points + 1
       restart()
@@ -207,7 +217,7 @@ function love.update(dt)
    -- bounce up and down
    if ball.y < ball.min_y or ball.y > ball.max_y then
       -- no random angle added here
-      ball.angle = bounce(ball.angle, 0, 0)
+      ball.speed.y = -ball.speed.y
       ball.y = bound(ball.y, ball.min_y, ball.max_y)
    end
 
@@ -219,7 +229,8 @@ function love.draw()
 
    if help_play then
       love.graphics.setColor(255, 218, 185)
-      love.graphics.line(ball.x, ball.y, ball.x + dx * 1, ball.y + dy * 1)
+      local dt = 1 -- 1 sec ahead
+      love.graphics.line(ball.x, ball.y, ball.x + ball.speed.x * dt,  ball.y + ball.speed.y * dt)
    end
 
    -- court
