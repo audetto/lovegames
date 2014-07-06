@@ -1,3 +1,5 @@
+local C = require("constants")
+
 local M = {}
 
 local function player_draw(self)
@@ -10,9 +12,6 @@ local function player_draw(self)
 end
 
 local function player_update(self, dt)
-   local speed_target_x = 100
-   local speed_target_y = 100
-
    local coeff_x = 0
    local coeff_y = 0
 
@@ -30,8 +29,8 @@ local function player_update(self, dt)
       coeff_x = 1
    end
 
-   self.speed.x = coeff_x * speed_target_x
-   self.speed.y = coeff_y * speed_target_y
+   self.speed.x = coeff_x * C.PADDLE_SPEED
+   self.speed.y = coeff_y * C.PADDLE_SPEED
 
    self.x = self.x + self.speed.x * dt
    self.y = self.y + self.speed.y * dt

@@ -1,5 +1,6 @@
-local Player = require "player"
-local Ball = require "ball"
+local Player = require("player")
+local Ball = require("ball")
+local C = require("constants")
 
 -- this is the top left
 local player_1 = Player.new({})
@@ -7,9 +8,6 @@ local player_2 = Player.new({})
 
 -- this is the centre
 local ball = Ball.new({})
-
--- radians
-local random_angle = 0.1
 
 -- autoplay
 local auto_play = false
@@ -101,7 +99,7 @@ function setup()
    player_1.min_x = min_of_game
    player_1.max_x = width / 2
    player_1.height = paddle_h
-   player_1.width = 10
+   player_1.width = C.PADDLE_WIDTH
 
    player_1.angle = math.pi / 2
 
@@ -129,7 +127,7 @@ function setup()
    player_2.min_x = width / 2
    player_2.max_x = max_of_game
    player_2.height = paddle_h
-   player_2.width = -10
+   player_2.width = -C.PADDLE_WIDTH
 
    player_2.angle = math.pi / 2
 
@@ -152,7 +150,7 @@ function restart()
    ball.y = height / 2
 
    -- points per second
-   local ball_speed = 200
+   local ball_speed = C.BALL_INITIAL_SPEED
    local ball_angle = (math.random() - 0.5) * math.pi / 2 * 0
 
    ball.speed.x = ball_speed * math.cos(ball_angle)
@@ -207,9 +205,9 @@ function love.update(dt)
    player_2:update(dt)
 
    if collision(ball, player_2) then
-      bounce(ball, player_2, random_angle)
+      bounce(ball, player_2, C.RANDOM_ANGLE)
    elseif collision(ball, player_1) then
-      bounce(ball, player_1, random_angle)
+      bounce(ball, player_1, C.RANDOM_ANGLE)
    elseif ball.x > ball.max_x then
       player_1.points = player_1.points + 1
       restart()

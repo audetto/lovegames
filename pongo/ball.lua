@@ -1,8 +1,10 @@
+local C = require("constants")
+
 local M = {}
 
 local function ball_draw(self)
    love.graphics.setColor(self.color)
-   love.graphics.circle('fill', self.x, self.y, self.r, 10)
+   love.graphics.circle('fill', self.x, self.y, self.r, C.BALL_RADIUS)
 end
 
 local function ball_update(self, dt)
