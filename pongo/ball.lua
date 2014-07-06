@@ -23,20 +23,10 @@ local function ball_update(self, dt)
    self.speed.y = s_y * coeff
 end
 
-local function ball_keypressed(self, key)
-   if key == "up" then
-      self.speed = self.speed + 10
-   elseif key == "down" then
-      self.speed = self.speed - 10
-   else
-      return true
-   end
-end
 
 function M.new(b)
    b.update = ball_update
    b.draw = ball_draw
-   b.keypressed = ball_keypressed
    return b
 end
 

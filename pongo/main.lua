@@ -264,8 +264,6 @@ function love.keypressed(key)
       return
    elseif not player_2:keypressed(key) then
       return
-   elseif not ball:keypressed(key) then
-      return
    elseif key == "q" then
       auto_play = not auto_play
    elseif key == "h" then
