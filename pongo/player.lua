@@ -43,8 +43,6 @@ local function player_keypressed(self, key)
       self.angle = self.angle + 0.1
    elseif key == self.keys.anti then
       self.angle = self.angle - 0.1
-   elseif key == self.keys.affect then
-      self.affect_ball = 1 - self.affect_ball
    else
       return true
    end

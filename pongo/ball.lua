@@ -8,8 +8,19 @@ local function ball_draw(self)
 end
 
 local function ball_update(self, dt)
-   self.x = self.x + self.speed.x * dt
-   self.y = self.y + self.speed.y * dt
+   local s_x = self.speed.x
+   local s_y = self.speed.y
+
+   self.x = self.x + s_x * dt
+   self.y = self.y + s_y * dt
+
+   local speed = math.sqrt(s_x * s_x + s_y * s_y)
+   self.alive = speed > C.BALL_MINIMUM_SPEED
+
+   -- we will loose C.BALL_DECELERATION speed per second
+   local coeff = 1 - C.BALL_DECELERATION * dt / speed
+   self.speed.x = s_x * coeff
+   self.speed.y = s_y * coeff
 end
 
 local function ball_keypressed(self, key)
