@@ -152,7 +152,7 @@ function restart()
 
    -- points per second
    local ball_speed = C.BALL_INITIAL_SPEED
-   local ball_angle = (math.random() - 0.5) * math.pi / 2 * 0
+   local ball_angle = (math.random() - 0.5) * math.pi / 2
 
    ball.alive = true
    ball.speed.x = ball_speed * math.cos(ball_angle)
