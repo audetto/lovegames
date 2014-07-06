@@ -1,6 +1,7 @@
 local Player = require("player")
 local Ball = require("ball")
 local C = require("constants")
+local Goal = require("goal")
 
 -- this is the top left
 local player_1 = Player.new({})
@@ -9,10 +10,12 @@ local player_2 = Player.new({})
 -- this is the centre
 local ball = Ball.new({})
 
+-- goal
+local goal = Goal.new()
+
 -- autoplay
 local auto_play = false
 local help_play = false
-
 
 function bounce(ball, player, random_angle)
    -- first calculate ball speed wrt player
@@ -141,6 +144,8 @@ end
 
 
 function restart()
+   goal.t = 0
+
    -- ball in the centre
    ball.x = (min_of_game + max_of_game) / 2
    ball.y = height / 2
@@ -189,6 +194,8 @@ end
 
 
 function love.update(dt)
+   goal:update(dt)
+
    ball:update(dt)
 
    if not ball.alive then
@@ -236,6 +243,8 @@ end
 
 function love.draw()
    love.graphics.setBackgroundColor(0, 0, 200)
+
+   goal:draw()
 
    if help_play then
       love.graphics.setColor(255, 218, 185)

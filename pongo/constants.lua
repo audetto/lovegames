@@ -17,4 +17,9 @@ M.PADDLE_SPEED = 100
 -- random angle
 M.RANDOM_ANGLE = 0.1
 
+-- GOAL
+M.GOAL_MAX_TIME = 2
+M.GOAL_MAX_PIXELS = 50
+M.GOAL_SPEED = 20
+
 return M
