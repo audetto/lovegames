@@ -2,6 +2,11 @@ local C = require("constants")
 
 local M = {}
 
+local function goal_start(self)
+   self.t = 0
+   self.x = 0
+end
+
 local function goal_draw(self)
    if self.t then
       love.graphics.translate(self.x, self.x)
@@ -25,6 +30,7 @@ end
 function M.new()
    g = {}
    g.t = nil
+   g.start = goal_start
    g.update = goal_update
    g.draw = goal_draw
    return g

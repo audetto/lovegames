@@ -144,8 +144,6 @@ end
 
 
 function restart()
-   goal.t = 0
-
    -- ball in the centre
    ball.x = (min_of_game + max_of_game) / 2
    ball.y = height / 2
@@ -164,6 +162,12 @@ function restart()
    -- leave players where they are
 end
 
+function point(player)
+   -- start goal effects
+   goal:start()
+
+   player.points = player.points + 1
+end
 
 function court_draw()
    love.graphics.setColor(255, 255, 0)
@@ -202,10 +206,10 @@ function love.update(dt)
       -- too slow: end of point
       if ball.x < width / 2 then
 	 -- player 1 court -> point to 2
-	 player_2.points = player_2.points + 1
+	 point(player_2)
       else
 	 -- player 2 court -> point to 1
-	 player_1.points = player_1.points + 1
+	 point(player_1)
       end
       return restart()
    end
@@ -225,10 +229,10 @@ function love.update(dt)
    elseif collision(ball, player_1) then
       bounce(ball, player_1, C.RANDOM_ANGLE)
    elseif ball.x > ball.max_x then
-      player_1.points = player_1.points + 1
+      point(player_1)
       return restart()
    elseif ball.x < ball.min_x then
-      player_2.points = player_2.points + 1
+      point(player_2)
       return restart()
    end
 
