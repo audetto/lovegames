@@ -52,7 +52,7 @@ function collision(ball, player)
    local dist_fromline = math.abs(a * ball.x + b * ball.y + c) / math.sqrt(a * a + b * b)
    if dist_fromline < ball.r then
       local dist_fromcentre = math.sqrt((player.x - ball.x) ^ 2 + (player.y - ball.y) ^ 2)
-      if dist_fromcentre < player.height / 2 then
+      if dist_fromcentre < (player.height / 2 + ball.r) then
 	 collision = true
       end
    end
