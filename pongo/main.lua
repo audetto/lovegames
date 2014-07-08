@@ -8,13 +8,13 @@ local player_1 = Player.new({})
 local player_2 = Player.new({})
 
 -- this is the centre
-local ball = Ball.new({})
+-- global for now to be accessed by player
+ball = Ball.new({})
 
 -- goal
 local goal = Goal.new()
 
 -- autoplay
-local auto_play = false
 local help_play = false
 
 function bounce(ball, player, random_angle)
@@ -87,6 +87,7 @@ function setup()
    ball.speed.y = 0
 
    -- player 1
+   player_1.auto = false
    player_1.points = 0
    player_1.color = {255, 0, 0}
 
@@ -100,6 +101,7 @@ function setup()
    player_1.max_y = height
    player_1.min_x = min_of_game
    player_1.max_x = width / 2
+   player_1.home_x = player_1.min_x
    player_1.height = paddle_h
    player_1.width = C.PADDLE_WIDTH
 
@@ -112,8 +114,10 @@ function setup()
    player_1.keys.right = "d"
    player_1.keys.clock = "x"
    player_1.keys.anti = "z"
+   player_1.keys.auto = "q"
 
    -- player 2
+   player_2.auto = false
    player_2.points = 0
    player_2.color = {255, 255, 0}
 
@@ -126,6 +130,7 @@ function setup()
    player_2.max_y = height
    player_2.min_x = width / 2
    player_2.max_x = max_of_game
+   player_2.home_x = player_2.max_x
    player_2.height = paddle_h
    player_2.width = -C.PADDLE_WIDTH
 
@@ -214,14 +219,7 @@ function love.update(dt)
       return restart()
    end
 
-   if auto_play then
-      -- this line makes it plays automatically
-      -- player_2.y = ball.y
-      player_1.y = ball.y
-   else
-      player_1:update(dt)
-   end
-
+   player_1:update(dt)
    player_2:update(dt)
 
    if collision(ball, player_2) then
@@ -277,8 +275,6 @@ function love.keypressed(key)
       return
    elseif not player_2:keypressed(key) then
       return
-   elseif key == "q" then
-      auto_play = not auto_play
    elseif key == "h" then
       help_play = not help_play
    end
