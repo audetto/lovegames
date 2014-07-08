@@ -78,8 +78,8 @@ function setup()
 
    ball.r = 15
    ball.color = {204, 204, 0}
-   ball.min_x = min_of_game + ball.r
-   ball.max_x = max_of_game - ball.r
+   ball.min_x = min_of_game
+   ball.max_x = max_of_game
    ball.min_y = ball.r
    ball.max_y = height - ball.r
    ball.speed = {}
