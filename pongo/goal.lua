@@ -28,7 +28,7 @@ local function goal_update(self, dt)
 end
 
 function M.new()
-   g = {}
+   local g = {}
    g.t = nil
    g.start = goal_start
    g.update = goal_update

@@ -12,6 +12,8 @@ local function player_draw(self)
 end
 
 local function player_update(self, dt)
+   local ball = game.ball
+
    if self.auto then
       -- we go towards the ball if it coming toward us, otherwise we go to rest position
       local towards_us = ball.speed.x * (ball.x - self.x) > 0
@@ -63,7 +65,7 @@ end
 
 
 function M.new()
-   p = {}
+   local p = {}
    p.auto = false
    p.points = 0
    p.speed = {}

@@ -1,21 +1,7 @@
-local Player = require("player")
-local Ball = require("ball")
+local Game = require("game")
 local C = require("constants")
-local Goal = require("goal")
 
--- this is the top left
-local player_1 = Player.new()
-local player_2 = Player.new()
-
--- this is the centre
--- global for now to be accessed by player
-ball = Ball.new()
-
--- goal
-local goal = Goal.new()
-
--- autoplay
-local help_play = false
+game = Game.new()
 
 function bounce(ball, player, random_angle)
    -- first calculate ball speed wrt player
@@ -69,91 +55,13 @@ function collision(ball, player)
 end
 
 
-function setup()
-   -- 100 pixels are the "goal" zone on each side
-   min_of_game = 100
-   max_of_game = width - min_of_game
-
-   ball.color = {204, 204, 0}
-   ball.min_x = min_of_game
-   ball.max_x = max_of_game
-   ball.min_y = ball.r
-   ball.max_y = height - ball.r
-
-   -- player 1
-   player_1.color = {255, 0, 0}
-   player_1.x = min_of_game
-   player_1.y = height / 2
-   player_1.min_y = 0
-   player_1.max_y = height
-   player_1.min_x = min_of_game
-   player_1.max_x = width / 2
-   player_1.home_x = player_1.min_x
-   player_1.width = C.PADDLE_WIDTH
-
-   player_1.keys.up = "w"
-   player_1.keys.down = "s"
-   player_1.keys.left = "a"
-   player_1.keys.right = "d"
-   player_1.keys.clock = "x"
-   player_1.keys.anti = "z"
-   player_1.keys.auto = "q"
-
-   -- player 2
-   player_2.color = {255, 255, 0}
-   player_2.x = max_of_game
-   player_2.y = height / 2
-   player_2.min_y = 0
-   player_2.max_y = height
-   player_2.min_x = width / 2
-   player_2.max_x = max_of_game
-   player_2.home_x = player_2.max_x
-   player_2.width = -C.PADDLE_WIDTH
-
-   player_2.keys.up = "i"
-   player_2.keys.down = "k"
-   player_2.keys.left = "j"
-   player_2.keys.right = "l"
-   player_2.keys.clock = "m"
-   player_2.keys.anti = "n"
-
-   restart()
-end
-
-
-function restart()
-   -- ball in the centre
-   ball.x = (min_of_game + max_of_game) / 2
-   ball.y = height / 2
-
-   -- points per second
-   local ball_speed = C.BALL_INITIAL_SPEED
-   local ball_angle = (math.random() - 0.5) * math.pi / 2
-
-   ball.alive = true
-   ball.speed.x = ball_speed * math.cos(ball_angle)
-   ball.speed.y = ball_speed * math.sin(ball_angle)
-
-   -- reset collision
-   player_1.collision = false
-   player_2.collision = false
-   -- leave players where they are
-end
-
 function point(player)
+   local goal = game.goal
+
    -- start goal effects
    goal:start()
 
    player.points = player.points + 1
-end
-
-function court_draw()
-   love.graphics.setColor(255, 255, 0)
-   love.graphics.line(min_of_game, 0, min_of_game, height)
-   love.graphics.line(max_of_game, 0, max_of_game, height)
-   love.graphics.line(width / 2, height * 2 / 5 , width / 2, height * 3 / 5)
-   love.graphics.rectangle('line', 0, 0, width, height)
-   love.graphics.circle('line', width / 2, height / 2, 10, 10)
 end
 
 
@@ -162,34 +70,39 @@ function love.load()
 
    love.keyboard.setKeyRepeat(true)
 
-   width = love.graphics.getWidth()
-   height = love.graphics.getHeight()
+   game.width = love.graphics.getWidth()
+   game.height = love.graphics.getHeight()
 
-   setup()
+   game:setup()
 
-   font = love.graphics.newFont(40)
+   local font = love.graphics.newFont(40)
    love.graphics.setFont(font)
 
    local joysticks = love.joystick.getJoysticks()
-   player_2.joystick = joysticks[1]
+   game.player_2.joystick = joysticks[1]
 end
 
 
 function love.update(dt)
+   local goal = game.goal
+   local ball = game.ball
+   local player_1 = game.player_1
+   local player_2 = game.player_2
+
    goal:update(dt)
 
    ball:update(dt)
 
    if not ball.alive then
       -- too slow: end of point
-      if ball.x < width / 2 then
+      if ball.x < game.width / 2 then
 	 -- player 1 court -> point to 2
 	 point(player_2)
       else
 	 -- player 2 court -> point to 1
 	 point(player_1)
       end
-      return restart()
+      return game:restart()
    end
 
    player_1:update(dt)
@@ -201,10 +114,10 @@ function love.update(dt)
       bounce(ball, player_1, C.RANDOM_ANGLE)
    elseif ball.x > ball.max_x then
       point(player_1)
-      return restart()
+      return game:restart()
    elseif ball.x < ball.min_x then
       point(player_2)
-      return restart()
+      return game:restart()
    end
 
    -- bounce up and down
@@ -217,18 +130,17 @@ end
 
 
 function love.draw()
+   local goal = game.goal
+   local ball = game.ball
+   local player_1 = game.player_1
+   local player_2 = game.player_2
+
    love.graphics.setBackgroundColor(0, 0, 200)
 
    goal:draw()
 
-   if help_play then
-      love.graphics.setColor(255, 218, 185)
-      local dt = 1 -- 1 sec ahead
-      love.graphics.line(ball.x, ball.y, ball.x + ball.speed.x * dt,  ball.y + ball.speed.y * dt)
-   end
-
    -- court
-   court_draw()
+   game:draw_court()
 
    -- players
    player_1:draw()
@@ -244,12 +156,16 @@ end
 
 
 function love.keypressed(key)
+   local ball = game.ball
+   local player_1 = game.player_1
+   local player_2 = game.player_2
+
    if not player_1:keypressed(key) then
       return
    elseif not player_2:keypressed(key) then
       return
-   elseif key == "h" then
-      help_play = not help_play
+   elseif not ball:keypressed(key) then
+      return
    end
 end
 
