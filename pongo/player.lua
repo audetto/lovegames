@@ -62,7 +62,17 @@ local function player_keypressed(self, key)
 end
 
 
-function M.new(p)
+function M.new()
+   p = {}
+   p.auto = false
+   p.points = 0
+   p.speed = {}
+   p.speed.x = 0
+   p.speed.y = 0
+   p.height = C.PADDLE_HEIGHT
+   p.angle = math.pi / 2
+   p.keys = {}
+
    p.update = player_update
    p.draw = player_draw
    p.keypressed = player_keypressed

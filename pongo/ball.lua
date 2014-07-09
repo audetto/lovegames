@@ -24,7 +24,14 @@ local function ball_update(self, dt)
 end
 
 
-function M.new(b)
+function M.new()
+   b = {}
+   b.alive = true
+   b.r = C.BALL_RADIUS
+   b.speed = {}
+   b.speed.x = 0
+   b.speed.y = 0
+
    b.update = ball_update
    b.draw = ball_draw
    return b

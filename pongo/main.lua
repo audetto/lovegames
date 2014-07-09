@@ -4,12 +4,12 @@ local C = require("constants")
 local Goal = require("goal")
 
 -- this is the top left
-local player_1 = Player.new({})
-local player_2 = Player.new({})
+local player_1 = Player.new()
+local player_2 = Player.new()
 
 -- this is the centre
 -- global for now to be accessed by player
-ball = Ball.new({})
+ball = Ball.new()
 
 -- goal
 local goal = Goal.new()
@@ -74,40 +74,23 @@ function setup()
    min_of_game = 100
    max_of_game = width - min_of_game
 
-   local paddle_h = 100
-
-   ball.r = 15
    ball.color = {204, 204, 0}
    ball.min_x = min_of_game
    ball.max_x = max_of_game
    ball.min_y = ball.r
    ball.max_y = height - ball.r
-   ball.speed = {}
-   ball.speed.x = 0
-   ball.speed.y = 0
 
    -- player 1
-   player_1.auto = false
-   player_1.points = 0
    player_1.color = {255, 0, 0}
-
    player_1.x = min_of_game
    player_1.y = height / 2
-   player_1.speed = {}
-   player_1.speed.x = 0
-   player_1.speed.y = 0
-
    player_1.min_y = 0
    player_1.max_y = height
    player_1.min_x = min_of_game
    player_1.max_x = width / 2
    player_1.home_x = player_1.min_x
-   player_1.height = paddle_h
    player_1.width = C.PADDLE_WIDTH
 
-   player_1.angle = math.pi / 2
-
-   player_1.keys = {}
    player_1.keys.up = "w"
    player_1.keys.down = "s"
    player_1.keys.left = "a"
@@ -117,26 +100,16 @@ function setup()
    player_1.keys.auto = "q"
 
    -- player 2
-   player_2.auto = false
-   player_2.points = 0
    player_2.color = {255, 255, 0}
-
    player_2.x = max_of_game
    player_2.y = height / 2
-   player_2.speed = {}
-   player_2.speed.x = 0
-   player_2.speed.y = 0
    player_2.min_y = 0
    player_2.max_y = height
    player_2.min_x = width / 2
    player_2.max_x = max_of_game
    player_2.home_x = player_2.max_x
-   player_2.height = paddle_h
    player_2.width = -C.PADDLE_WIDTH
 
-   player_2.angle = math.pi / 2
-
-   player_2.keys = {}
    player_2.keys.up = "i"
    player_2.keys.down = "k"
    player_2.keys.left = "j"
