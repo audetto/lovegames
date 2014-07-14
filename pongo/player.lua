@@ -11,7 +11,7 @@ local function player_draw(self)
    love.graphics.pop()
 end
 
-local function player_update(self, dt)
+local function player_update(self, dt, game)
    local ball = game.ball
 
    if self.auto then

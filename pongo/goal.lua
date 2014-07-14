@@ -13,7 +13,7 @@ local function goal_draw(self)
    end
 end
 
-local function goal_update(self, dt)
+local function goal_update(self, dt, game)
    if self.t then
       self.t = self.t + dt
       local t = self.t

@@ -13,7 +13,7 @@ local function ball_draw(self)
    love.graphics.circle('fill', self.x, self.y, self.r, C.BALL_RADIUS)
 end
 
-local function ball_update(self, dt)
+local function ball_update(self, dt, game)
    local s_x = self.speed.x
    local s_y = self.speed.y
 
@@ -27,6 +27,14 @@ local function ball_update(self, dt)
    local coeff = 1 - C.BALL_DECELERATION * dt / speed
    self.speed.x = s_x * coeff
    self.speed.y = s_y * coeff
+
+   -- bounce up and down
+   if self.y < self.min_y or self.y > self.max_y then
+      -- no random angle added here
+      self.speed.y = -self.speed.y
+      self.y = bound(self.y, self.min_y, self.max_y)
+   end
+
 end
 
 local function ball_keypressed(self, key)

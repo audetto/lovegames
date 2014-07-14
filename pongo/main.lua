@@ -1,7 +1,7 @@
 local Game = require("game")
 local C = require("constants")
 
-game = Game.new()
+local game = Game.new()
 
 function bounce(ball, player, random_angle)
    -- first calculate ball speed wrt player
@@ -89,9 +89,9 @@ function love.update(dt)
    local player_1 = game.player_1
    local player_2 = game.player_2
 
-   goal:update(dt)
+   goal:update(dt, game)
 
-   ball:update(dt)
+   ball:update(dt, game)
 
    if not ball.alive then
       -- too slow: end of point
@@ -105,8 +105,8 @@ function love.update(dt)
       return game:restart()
    end
 
-   player_1:update(dt)
-   player_2:update(dt)
+   player_1:update(dt, game)
+   player_2:update(dt, game)
 
    if collision(ball, player_2) then
       bounce(ball, player_2, C.RANDOM_ANGLE)
@@ -118,13 +118,6 @@ function love.update(dt)
    elseif ball.x < ball.min_x then
       point(player_2)
       return game:restart()
-   end
-
-   -- bounce up and down
-   if ball.y < ball.min_y or ball.y > ball.max_y then
-      -- no random angle added here
-      ball.speed.y = -ball.speed.y
-      ball.y = bound(ball.y, ball.min_y, ball.max_y)
    end
 end
 
