@@ -82,6 +82,9 @@ local function game_restart(self)
    player_1.collision = false
    player_2.collision = false
    -- leave players where they are
+
+   -- done processing events
+   return true
 end
 
 

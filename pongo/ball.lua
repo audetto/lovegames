@@ -14,6 +14,9 @@ local function ball_draw(self)
 end
 
 local function ball_update(self, dt, game)
+   local player_1 = game.player_1
+   local player_2 = game.player_2
+
    local s_x = self.speed.x
    local s_y = self.speed.y
 
@@ -35,14 +38,39 @@ local function ball_update(self, dt, game)
       self.y = bound(self.y, self.min_y, self.max_y)
    end
 
+   if collision(self, player_2) then
+      bounce(self, player_2, C.RANDOM_ANGLE)
+   elseif collision(self, player_1) then
+      bounce(self, player_1, C.RANDOM_ANGLE)
+   elseif self.x > self.max_x then
+      point(player_1)
+      return game:restart()
+   elseif self.x < self.min_x then
+      point(player_2)
+      return game:restart()
+   end
+
+   if not self.alive then
+      -- too slow: end of point
+      if self.x < game.width / 2 then
+	 -- player 1 court -> point to 2
+	 point(player_2)
+      else
+	 -- player 2 court -> point to 1
+	 point(player_1)
+      end
+      return game:restart()
+   end
+
 end
 
 local function ball_keypressed(self, key)
    if key == "h" then
       self.help = not self.help
    else
-      return true
+      return false
    end
+   return true
 end
 
 

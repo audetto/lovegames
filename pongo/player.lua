@@ -59,8 +59,11 @@ local function player_keypressed(self, key)
    elseif key == self.keys.auto then
       self.auto = not self.auto
    else
-      return true
+      -- not processed
+      return false
    end
+   -- processed
+   return true
 end
 
 

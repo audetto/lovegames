@@ -89,35 +89,14 @@ function love.update(dt)
    local player_1 = game.player_1
    local player_2 = game.player_2
 
-   goal:update(dt, game)
-
-   ball:update(dt, game)
-
-   if not ball.alive then
-      -- too slow: end of point
-      if ball.x < game.width / 2 then
-	 -- player 1 court -> point to 2
-	 point(player_2)
-      else
-	 -- player 2 court -> point to 1
-	 point(player_1)
-      end
-      return game:restart()
-   end
-
-   player_1:update(dt, game)
-   player_2:update(dt, game)
-
-   if collision(ball, player_2) then
-      bounce(ball, player_2, C.RANDOM_ANGLE)
-   elseif collision(ball, player_1) then
-      bounce(ball, player_1, C.RANDOM_ANGLE)
-   elseif ball.x > ball.max_x then
-      point(player_1)
-      return game:restart()
-   elseif ball.x < ball.min_x then
-      point(player_2)
-      return game:restart()
+   if goal:update(dt, game) then
+      return
+   elseif ball:update(dt, game) then
+      return
+   elseif player_1:update(dt, game) then
+      return
+   elseif player_2:update(dt, game) then
+      return
    end
 end
 
@@ -153,11 +132,11 @@ function love.keypressed(key)
    local player_1 = game.player_1
    local player_2 = game.player_2
 
-   if not player_1:keypressed(key) then
+   if player_1:keypressed(key) then
       return
-   elseif not player_2:keypressed(key) then
+   elseif player_2:keypressed(key) then
       return
-   elseif not ball:keypressed(key) then
+   elseif ball:keypressed(key) then
       return
    end
 end
