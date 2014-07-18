@@ -75,57 +75,17 @@ end
 
 
 function love.update(dt)
-   local goal = game.goal
-   local ball = game.ball
-   local player_1 = game.player_1
-   local player_2 = game.player_2
-
-   if goal:update(dt, game) then
-      return
-   elseif ball:update(dt, game) then
-      return
-   elseif player_1:update(dt, game) then
-      return
-   elseif player_2:update(dt, game) then
-      return
-   end
+   game:update(dt)
 end
 
 
 function love.draw()
-   local goal = game.goal
-   local ball = game.ball
-   local player_1 = game.player_1
-   local player_2 = game.player_2
-
-   love.graphics.setBackgroundColor(0, 0, 200)
-
-   goal:draw()
-
-   -- court
    game:draw()
-
-   -- players
-   player_1:draw()
-   player_2:draw()
-
-   -- ball
-   ball:draw()
 end
 
 
 function love.keypressed(key)
-   local ball = game.ball
-   local player_1 = game.player_1
-   local player_2 = game.player_2
-
-   if player_1:keypressed(key) then
-      return
-   elseif player_2:keypressed(key) then
-      return
-   elseif ball:keypressed(key) then
-      return
-   end
+   game:keypressed(key)
 end
 
 

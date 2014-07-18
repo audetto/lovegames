@@ -44,10 +44,10 @@ local function ball_update(self, dt, game)
       bounce(self, player_1, C.RANDOM_ANGLE)
    elseif self.x > self.max_x then
       point(player_1)
-      return game:restart()
+      return true
    elseif self.x < self.min_x then
       point(player_2)
-      return game:restart()
+      return true
    end
 
    if not self.alive then
@@ -59,7 +59,7 @@ local function ball_update(self, dt, game)
 	 -- player 2 court -> point to 1
 	 point(player_1)
       end
-      return game:restart()
+      return true
    end
 
 end

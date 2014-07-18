@@ -61,15 +61,19 @@ local function game_setup(self)
    player_2.keys.anti = "n"
 
    -- font and points
-
    local font = love.graphics.newFont(40)
    love.graphics.setFont(font)
 
    local joysticks = love.joystick.getJoysticks()
    player_2.joystick = joysticks[1]
 
-   -- reset
+   self.objects = {}
+   self.objects[self.goal] = true
+   self.objects[self.ball] = true
+   self.objects[self.player_1] = true
+   self.objects[self.player_2] = true
 
+   -- reset
    self:restart()
 end
 
@@ -95,13 +99,10 @@ local function game_restart(self)
    player_1.collision = false
    player_2.collision = false
    -- leave players where they are
-
-   -- done processing events
-   return true
 end
 
 
-local function game_draw(self)
+local function game_draw_court(self)
    local player_1 = self.player_1
    local player_2 = self.player_2
 
@@ -118,6 +119,52 @@ local function game_draw(self)
    love.graphics.print(player_1.points .. " : " .. player_2.points, 300, 300)
 end
 
+
+local function game_update(self, dt)
+   for o in pairs(self.objects) do
+      local f = o.update
+      if f then
+	 if f(o, dt, self) then
+	    -- a restart needs to be called
+	    self:restart()
+	    return
+	 end
+      end
+   end
+end
+
+
+local function game_draw(self)
+   love.graphics.setBackgroundColor(0, 0, 200)
+
+   -- here we should really draw goal first
+   -- otherwise all effects are applied in random order
+   for o in pairs(self.objects) do
+      local f = o.draw
+      if f then
+	 f(o)
+      end
+   end
+
+   -- court
+   -- at the end to keep some symmetry
+   self:draw_court()
+end
+
+
+local function game_keypressed(self)
+   for o in pairs(self.objects) do
+      local f = o.keypressed
+      if f then
+	 if f(o, key) then
+	    -- done event processed: return
+	    return
+	 end
+      end
+   end
+end
+
+
 function M.new()
    local g = {}
    g.player_1 = Player.new()
@@ -128,7 +175,10 @@ function M.new()
 
    g.setup = game_setup
    g.restart = game_restart
+   g.draw_court = game_draw_court
    g.draw = game_draw
+   g.keypressed = game_keypressed
+   g.update = game_update
 
    return g
 end
