@@ -70,16 +70,7 @@ function love.load()
 
    love.keyboard.setKeyRepeat(true)
 
-   game.width = love.graphics.getWidth()
-   game.height = love.graphics.getHeight()
-
    game:setup()
-
-   local font = love.graphics.newFont(40)
-   love.graphics.setFont(font)
-
-   local joysticks = love.joystick.getJoysticks()
-   game.player_2.joystick = joysticks[1]
 end
 
 
@@ -112,7 +103,7 @@ function love.draw()
    goal:draw()
 
    -- court
-   game:draw_court()
+   game:draw()
 
    -- players
    player_1:draw()
@@ -120,10 +111,6 @@ function love.draw()
 
    -- ball
    ball:draw()
-
-   -- points
-   love.graphics.setColor(123, 204, 40)
-   love.graphics.print(player_1.points .. " : " .. player_2.points, 300, 300)
 end
 
 

@@ -10,6 +10,9 @@ local function game_setup(self)
    local player_1 = self.player_1
    local player_2 = self.player_2
 
+   self.width = love.graphics.getWidth()
+   self.height = love.graphics.getHeight()
+
    -- 100 pixels are the "goal" zone on each side
    self.min_of_game = 100
    self.max_of_game = self.width - self.min_of_game
@@ -57,6 +60,16 @@ local function game_setup(self)
    player_2.keys.clock = "m"
    player_2.keys.anti = "n"
 
+   -- font and points
+
+   local font = love.graphics.newFont(40)
+   love.graphics.setFont(font)
+
+   local joysticks = love.joystick.getJoysticks()
+   player_2.joystick = joysticks[1]
+
+   -- reset
+
    self:restart()
 end
 
@@ -88,13 +101,21 @@ local function game_restart(self)
 end
 
 
-local function game_draw_court(self)
+local function game_draw(self)
+   local player_1 = self.player_1
+   local player_2 = self.player_2
+
+   -- court
    love.graphics.setColor(255, 255, 0)
    love.graphics.line(self.min_of_game, 0, self.min_of_game, self.height)
    love.graphics.line(self.max_of_game, 0, self.max_of_game, self.height)
    love.graphics.line(self.width / 2, self.height * 2 / 5 , self.width / 2, self.height * 3 / 5)
    love.graphics.rectangle('line', 0, 0, self.width, self.height)
    love.graphics.circle('line', self.width / 2, self.height / 2, 10, 10)
+
+   -- points
+   love.graphics.setColor(123, 204, 40)
+   love.graphics.print(player_1.points .. " : " .. player_2.points, 300, 300)
 end
 
 function M.new()
@@ -107,7 +128,7 @@ function M.new()
 
    g.setup = game_setup
    g.restart = game_restart
-   g.draw_court = game_draw_court
+   g.draw = game_draw
 
    return g
 end
