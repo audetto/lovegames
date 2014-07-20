@@ -152,7 +152,7 @@ local function game_draw(self)
 end
 
 
-local function game_keypressed(self)
+local function game_keypressed(self, key)
    for o in pairs(self.objects) do
       local f = o.keypressed
       if f then
