@@ -95,9 +95,11 @@ local function game_restart(self)
    ball.speed.x = ball_speed * math.cos(ball_angle)
    ball.speed.y = ball_speed * math.sin(ball_angle)
 
-   -- reset collision
+   -- reset players
    player_1.collision = false
    player_2.collision = false
+   player_1.targets = nil
+   player_2.targets = nil
    -- leave players where they are
 end
 

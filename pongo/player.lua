@@ -1,6 +1,8 @@
 local C = require("constants")
+local A = require("autoplay")
 
 local M = {}
+
 
 local function player_draw(self)
    love.graphics.setColor(self.color)
@@ -9,7 +11,15 @@ local function player_draw(self)
    love.graphics.rotate(self.angle)
    love.graphics.rectangle('fill', -self.height / 2, 0, self.height, self.width)
    love.graphics.pop()
+
+   local t = self.targets
+   if t then
+      for _, o in ipairs(t) do
+	 love.graphics.circle('fill', o.x, o.y, 10, 10)
+      end
+   end
 end
+
 
 local function player_update(self, dt, game)
    local ball = game.ball
@@ -51,6 +61,7 @@ local function player_update(self, dt, game)
    self.y = bound(self.y, self.min_y, self.max_y)
 end
 
+
 local function player_keypressed(self, key)
    if key == self.keys.clock then
       self.angle = self.angle + 0.1
@@ -67,6 +78,15 @@ local function player_keypressed(self, key)
 end
 
 
+local function player_autoplay(self, ball)
+   if self.auto then
+      self.targets = A.target(ball, self)
+   else
+      self.targets = nil
+   end
+end
+
+
 function M.new()
    local p = {}
    p.auto = false
@@ -77,10 +97,12 @@ function M.new()
    p.height = C.PADDLE_HEIGHT
    p.angle = math.pi / 2
    p.keys = {}
+   p.target = {}
 
    p.update = player_update
    p.draw = player_draw
    p.keypressed = player_keypressed
+   p.autoplay = player_autoplay
    return p
 end
 

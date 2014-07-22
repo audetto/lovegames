@@ -40,8 +40,10 @@ local function ball_update(self, dt, game)
 
    if collision(self, player_2) then
       bounce(self, player_2, C.RANDOM_ANGLE)
+      player_1:autoplay(self)
    elseif collision(self, player_1) then
       bounce(self, player_1, C.RANDOM_ANGLE)
+      player_2:autoplay(self)
    elseif self.x > self.max_x then
       point(player_1)
       return true
