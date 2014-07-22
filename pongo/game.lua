@@ -68,10 +68,10 @@ local function game_setup(self)
    player_2.joystick = joysticks[1]
 
    self.objects = {}
-   self.objects[self.goal] = true
-   self.objects[self.ball] = true
-   self.objects[self.player_1] = true
-   self.objects[self.player_2] = true
+   self.objects[1] = self.goal
+   self.objects[2] = self.ball
+   self.objects[3] = self.player_1
+   self.objects[4] = self.player_2
 
    -- reset
    self:restart()
@@ -121,7 +121,7 @@ end
 
 
 local function game_update(self, dt)
-   for o in pairs(self.objects) do
+   for _, o in ipairs(self.objects) do
       local f = o.update
       if f then
 	 if f(o, dt, self) then
@@ -137,23 +137,23 @@ end
 local function game_draw(self)
    love.graphics.setBackgroundColor(0, 0, 200)
 
-   -- here we should really draw goal first
+   -- here must draw goal first
    -- otherwise all effects are applied in random order
-   for o in pairs(self.objects) do
+   for _, o in ipairs(self.objects) do
       local f = o.draw
       if f then
 	 f(o)
       end
    end
 
-   -- court
-   -- at the end to keep some symmetry
+   -- draw it at the end as goal must be first!
    self:draw_court()
+
 end
 
 
 local function game_keypressed(self, key)
-   for o in pairs(self.objects) do
+   for _, o in ipairs(self.objects) do
       local f = o.keypressed
       if f then
 	 if f(o, key) then
