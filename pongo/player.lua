@@ -26,8 +26,8 @@ local function player_update(self, dt, game)
 
    if self.auto then
       -- we go towards the ball if it coming toward us, otherwise we go to rest position
-      local towards_us = ball.speed.x * (ball.x - self.x) > 0
-      local target_x = towards_us and self.home_x or ball.x
+      local towards_us = ball.speed.x * (self.x - ball.x) > 0
+      local target_x = towards_us and ball.x or self.home_x
       local s_x = (target_x - self.x) / dt
       local s_y = (ball.y - self.y) / dt
 
