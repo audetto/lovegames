@@ -64,8 +64,10 @@ local function game_setup(self)
    local font = love.graphics.newFont(40)
    love.graphics.setFont(font)
 
-   local joysticks = love.joystick.getJoysticks()
-   player_2.joystick = joysticks[1]
+   -- love 8 compatibility
+   local getJoystick = love.joystick.getJoysticks
+   local joysticks = getJoystick and getJoysticks()
+   player_2.joystick = joysticks and joysticks[1]
 
    self.objects = {}
    self.objects[1] = self.goal
