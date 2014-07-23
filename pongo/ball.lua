@@ -10,7 +10,7 @@ local function ball_draw(self)
    end
 
    love.graphics.setColor(self.color)
-   love.graphics.circle('fill', self.x, self.y, self.r, C.BALL_RADIUS)
+   love.graphics.circle('fill', self.x, self.y, self.r, 10)
 end
 
 local function ball_update(self, dt, game)
