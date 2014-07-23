@@ -32,6 +32,7 @@ local function game_setup(self)
    player_1.min_x = self.min_of_game
    player_1.max_x = self.width / 2
    player_1.home_x = player_1.min_x
+   player_1.center_x = player_1.max_x
    player_1.width = C.PADDLE_WIDTH
 
    player_1.keys.up = "w"
@@ -51,6 +52,7 @@ local function game_setup(self)
    player_2.min_x = self.width / 2
    player_2.max_x = self.max_of_game
    player_2.home_x = player_2.max_x
+   player_1.center_x = player_2.min_x
    player_2.width = -C.PADDLE_WIDTH
 
    player_2.keys.up = "i"
@@ -100,8 +102,8 @@ local function game_restart(self)
    -- reset players
    player_1.collision = false
    player_2.collision = false
-   player_1.targets = nil
-   player_2.targets = nil
+   player_1.target = nil
+   player_2.target = nil
    -- leave players where they are
 end
 

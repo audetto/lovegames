@@ -21,7 +21,7 @@ function bounce(ball, player, random_angle)
    ball.speed.x = ball_speed * math.cos(new_angle) + player.speed.x
    ball.speed.y = ball_speed * math.sin(new_angle) + player.speed.y
 
-   player.targets = nil
+   player.target = nil
 end
 
 

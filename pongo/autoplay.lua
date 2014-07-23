@@ -1,89 +1,153 @@
+local C = require("constants")
+
 local M = {}
 
 -- maybe we should merge the 2 functions below
-local function intersect_x(dx, dy, x0, y0, x, min_y, max_y)
-   local inc_x = x - x0
-   -- first check intersection happens in the positive direction of movement
-   -- i.e. not backward
-   if inc_x * dx > 0 then
-      local y = inc_x * dy / dx + y0
+local function intersect_x(pos0, x, min_y, max_y)
+   local inc_x = x - pos0.x
+
+   -- first check intersection happens in the future
+   local dt = inc_x / pos0.vx
+
+   if dt > 0 then
+      local y = inc_x * pos0.vy / pos0.vx + pos0.y
       if y >= min_y and y <= max_y then
-	 local t = {}
-	 t.x = x
-	 t.y = y
-	 return t
+	 local hit_time = pos0.t0 + dt
+	 local pos = {x = x, y = y, vx = pos0.vx, vy = pos0.vy, t0 = hit_time}
+	 -- this is the end of the previous segment
+	 pos0.t1 = hit_time
+	 return pos
       end
    end
 end
 
 
-local function intersect_y(dx, dy, x0, y0, y, min_x, max_x)
-   local inc_y = y - y0
-   -- first check intersection happens in the positive direction of movement
-   -- i.e. not backward
-   if inc_y * dy > 0 then
-      local x = inc_y * dx / dy + x0
+local function intersect_y(pos0, y, min_x, max_x)
+   local inc_y = y - pos0.y
+
+   -- first check intersection happens in the future
+   local dt = inc_y / pos0.vy
+
+   if dt > 0 then
+      local x = inc_y * pos0.vx / pos0.vy + pos0.x
       if x >= min_x and x <= max_x then
-	 local t = {}
-	 t.x = x
-	 t.y = y
-	 return t
+	 local hit_time = pos0.t0 + dt
+	 local pos = {x = x, y = y, vx = pos0.vx, vy = pos0.vy, t0 = hit_time}
+	 -- this is the end of the previous segment
+	 pos0.t1 = hit_time
+	 return pos
+      end
+   end
+end
+
+
+-- intersection of [x1, x2] and [y1, y2]
+local function intersection(x1, x2, y1, y2)
+   local z1 = math.max(x1, y1)
+   local z2 = math.min(x2, y2)
+
+   if z2 >= z1 then
+      return z1, z2
+   end
+end
+
+
+local function solve_segment(player, pos)
+   local dx = pos.x - player.x
+   local dy = pos.y - player.y
+
+   local a = pos.vx ^ 2 + pos.vy ^ 2 - C.PADDLE_SPEED ^ 2
+   local b = dx * pos.vx + dy * pos.vy
+   local c = dx ^ 2 + dy ^ 2
+
+   local disc = b ^ 2 - a * c
+   if disc > 0 then
+      local d = math.sqrt(disc)
+      local t0 = (-b - d) / a
+      local t1 = (-b + d) / a
+
+      t0, t1 = math.min(t0, t1), math.max(t0, t1)
+
+      local z1, z2 = intersection(t0, t1, 0, pos.t1 - pos.t0)
+
+      if z1 and z2 then
+	 local target = {}
+
+	 local target_t = z1
+	 target.t = target_t
+	 target.x = pos.x + target_t * pos.vx
+	 target.y = pos.y + target_t * pos.vy
+
+	 return target
       end
    end
 end
 
 
 function M.target(ball, player)
-   local dx = ball.speed.x
-   local dy = ball.speed.y
+   local pos0 = {x = ball.x, y = ball.y, vx = ball.speed.x, vy = ball.speed.y, t0 = 0}
 
-   local x0 = ball.x
-   local y0 = ball.y
-
-   local towards_us = dx * (x0 - player.x) < 0
+   local towards_us = ball.speed.x * (player.x - pos0.x) > 0
 
    if towards_us then
-      local targets = {}
+      local positions = {}
 
       local counter = 0
+      local playable = false
 
       repeat
-	 local done = true
-	 local t
+	 local goal = false
+	 local bounce = false
+
+	 local pos
 
 	 -- first let's check if it gets home
-	 t = intersect_x(dx, dy, x0, y0, ball.min_x, ball.min_y, ball.max_y)
-	 if not t then
-	    t = intersect_x(dx, dy, x0, y0, ball.max_x, ball.min_y, ball.max_y)
-	    if not t then 
+	 pos = intersect_x(pos0, player.center_x, ball.min_y, ball.max_y)
+	 if pos then
+	    -- it is on our side of the court
+	    playable = true
+	 else
+	    pos = intersect_x(pos0, player.home_x, ball.min_y, ball.max_y)
+	    if pos then
+	       -- goal, this is the last segment
+	       goal = true
+	    else
 	       -- these 2 are intersection with walls
-	       -- there will be more before getting home
-	       t = intersect_y(dx, dy, x0, y0, ball.min_y, ball.min_x, ball.max_x)
-	       if t then
-		  done = false
-	       else
-		  t = intersect_y(dx, dy, x0, y0, ball.max_y, ball.min_x, ball.max_x)
-		  if t then
-		     done = false
+	       pos = intersect_y(pos0, ball.min_y, ball.min_x, ball.max_x)
+	       if not pos then
+		  pos = intersect_y(pos0, ball.max_y, ball.min_x, ball.max_x)
+		  if not pos then
+		     print("so what?")
 		  end
 	       end
+	       -- if we get here we have bounced on the walls
+	       bounce = pos -- this is used as boolean
 	    end
 	 end
 
-	 if t then
-	    -- add intersection point and start new segment
-	    targets[#targets + 1] = t
-	    x0 = t.x
-	    y0 = t.y
-	    -- we can only bounce on the walls (i.e. in y direction)
-	    dy = -dy
+	 if pos then
+	    -- start a new segment
+	    pos0 = pos
+
+	    if bounce then
+	       pos0.vy = -pos0.vy
+	    end
+
+	    if playable and not goal then
+	       positions[#positions + 1] = pos0
+	    end
 	 end
 
 	 -- just to avoid nasty infinite loops
 	 counter = counter + 1
-      until done or counter == 50
+      until goal or counter == 50
 
-      return targets
+      for _, pos in ipairs(positions) do
+	 local target = solve_segment(player, pos)
+	 if target then
+	    return target
+	 end
+      end
    end
 end
 

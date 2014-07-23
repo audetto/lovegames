@@ -12,11 +12,9 @@ local function player_draw(self)
    love.graphics.rectangle('fill', -self.height / 2, 0, self.height, self.width)
    love.graphics.pop()
 
-   local t = self.targets
+   local t = self.target
    if t then
-      for _, o in ipairs(t) do
-	 love.graphics.circle('fill', o.x, o.y, 10, 10)
-      end
+      love.graphics.circle('fill', t.x, t.y, 20, 10)
    end
 end
 
@@ -80,9 +78,9 @@ end
 
 local function player_autoplay(self, ball)
    if self.auto then
-      self.targets = A.target(ball, self)
+      self.target = A.target(ball, self)
    else
-      self.targets = nil
+      self.target = nil
    end
 end
 
