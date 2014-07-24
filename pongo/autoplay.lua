@@ -79,6 +79,7 @@ local function solve_segment(player, pos)
 
 	 local target_t = z1
 	 target.t = target_t
+	 -- calculate the ball position at the target time
 	 target.x = pos.x + target_t * pos.vx
 	 target.y = pos.y + target_t * pos.vy
 
@@ -94,16 +95,13 @@ function M.target(ball, player)
    local towards_us = ball.speed.x * (player.x - pos0.x) > 0
 
    if towards_us then
-      local positions = {}
-
       local counter = 0
       local playable = false
+      local pos
 
       repeat
 	 local goal = false
 	 local bounce = false
-
-	 local pos
 
 	 -- first let's check if it gets home
 	 pos = intersect_x(pos0, player.center_x, ball.min_y, ball.max_y)
@@ -130,15 +128,21 @@ function M.target(ball, player)
 	 end
 
 	 if pos then
+	    -- we've just finished a segment
+	    -- try to solve it
+	    if playable then
+	       local target = solve_segment(player, pos0)
+	       if target then
+		  -- if there is a solution, just return it
+		  return target
+	       end
+	    end
+
 	    -- start a new segment
 	    pos0 = pos
 
 	    if bounce then
 	       pos0.vy = -pos0.vy
-	    end
-
-	    if playable and not goal then
-	       positions[#positions + 1] = pos0
 	    end
 	 end
 
@@ -146,17 +150,7 @@ function M.target(ball, player)
 	 counter = counter + 1
       until goal or counter == 50
 
-      for _, pos in ipairs(positions) do
-	 local target = solve_segment(player, pos)
-	 if target then
-	    -- if there is a solution, just return it
-	    return target
-	 end
-      end
-
-      -- this should be the last intersection (the one before the goal)
-      -- try to defend there (maybe)
-      return positions[#positions]
+      return pos
    end
 end
 
