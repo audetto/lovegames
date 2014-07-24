@@ -56,9 +56,10 @@ local function solve_segment(player, pos)
    local dx = pos.x - player.x
    local dy = pos.y - player.y
 
-   local a = pos.vx ^ 2 + pos.vy ^ 2 - C.PADDLE_SPEED ^ 2
-   local b = dx * pos.vx + dy * pos.vy
-   local c = dx ^ 2 + dy ^ 2
+   local n = C.PADDLE_SPEED ^ 2
+   local a = pos.vx ^ 2 + pos.vy ^ 2 - n
+   local b = dx * pos.vx + dy * pos.vy - n * pos.t0
+   local c = dx ^ 2 + dy ^ 2 - n * pos.t0 ^ 2
 
    local disc = b ^ 2 - a * c
    if disc > 0 then
@@ -66,8 +67,11 @@ local function solve_segment(player, pos)
       local t0 = (-b - d) / a
       local t1 = (-b + d) / a
 
+      -- a bit complicated
+      -- we just search for the smallest fesible time
       t0, t1 = math.min(t0, t1), math.max(t0, t1)
 
+      -- this actually returns the feasible time interval
       local z1, z2 = intersection(t0, t1, 0, pos.t1 - pos.t0)
 
       if z1 and z2 then
@@ -145,9 +149,14 @@ function M.target(ball, player)
       for _, pos in ipairs(positions) do
 	 local target = solve_segment(player, pos)
 	 if target then
+	    -- if there is a solution, just return it
 	    return target
 	 end
       end
+
+      -- this should be the last intersection (the one before the goal)
+      -- try to defend there (maybe)
+      return positions[#positions]
    end
 end
 
