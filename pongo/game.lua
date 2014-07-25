@@ -10,6 +10,10 @@ local function game_setup(self)
    local player_1 = self.player_1
    local player_2 = self.player_2
 
+   -- to alternate who gets the ball
+   -- -1,1 mapped to 0,math.pi/2
+   self.heads_tails = 1
+
    self.width = love.graphics.getWidth()
    self.height = love.graphics.getHeight()
 
@@ -96,6 +100,10 @@ local function game_restart(self)
    local ball_speed = C.BALL_INITIAL_SPEED
    local ball_angle = (math.random() - 0.5) * math.pi / 2
 
+   -- so we alternate who gets the ball first
+   ball_angle = ball_angle + (self.head_tails + 1) * math.pi / 2
+   self.heads_tails = -self.head_tails
+
    ball.alive = true
    ball.speed.x = ball_speed * math.cos(ball_angle)
    ball.speed.y = ball_speed * math.sin(ball_angle)
@@ -106,6 +114,9 @@ local function game_restart(self)
    player_1.target = nil
    player_2.target = nil
    -- leave players where they are
+
+   player_1:autoplay(ball)
+   player_2:autoplay(ball)
 end
 
 
