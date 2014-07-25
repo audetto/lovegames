@@ -25,7 +25,8 @@ local function player_update(self, dt, game)
    if self.auto then
       local t = self.target
       if not t then
-	 t = {x = self.home_x + 50, y = 0.5 * (self.min_y + self.max_y)}
+	 local x = self.home_x + (self.center_x - self.home_x) * 0.1
+	 t = {x = x, y = 0.5 * (self.min_y + self.max_y)}
       end
 
       local sx = (t.x - self.x) / dt

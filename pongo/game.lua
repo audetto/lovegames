@@ -52,7 +52,7 @@ local function game_setup(self)
    player_2.min_x = self.width / 2
    player_2.max_x = self.max_of_game
    player_2.home_x = player_2.max_x
-   player_1.center_x = player_2.min_x
+   player_2.center_x = player_2.min_x
    player_2.width = -C.PADDLE_WIDTH
 
    player_2.keys.up = "i"
@@ -61,6 +61,7 @@ local function game_setup(self)
    player_2.keys.right = "l"
    player_2.keys.clock = "m"
    player_2.keys.anti = "n"
+   player_2.keys.auto = "p"
 
    -- font and points
    local font = love.graphics.newFont(40)
