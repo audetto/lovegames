@@ -28,11 +28,18 @@ local function player_update(self, dt, game)
 	 t = {x = self.home_x + 50, y = 0.5 * (self.min_y + self.max_y)}
       end
 
-      local s_x = (t.x - self.x) / dt
-      local s_y = (t.y - self.y) / dt
+      local sx = (t.x - self.x) / dt
+      local sy = (t.y - self.y) / dt
 
-      self.speed.x = bound(s_x, -C.PADDLE_SPEED, C.PADDLE_SPEED)
-      self.speed.y = bound(s_y, -C.PADDLE_SPEED, C.PADDLE_SPEED)
+      local speed = math.sqrt(sx * sx + sy * sy)
+      if speed > C.PADDLE_SPEED then
+	 local ratio = C.PADDLE_SPEED / speed
+	 sx = sx * ratio
+	 sy = sy * ratio
+      end
+
+      self.speed.x = sx
+      self.speed.y = sy
    else
       local coeff_x = 0
       local coeff_y = 0
