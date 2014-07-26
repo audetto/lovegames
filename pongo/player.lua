@@ -86,11 +86,22 @@ local function player_keypressed(self, key)
 end
 
 
-local function player_autoplay(self, ball)
+local function player_bounce(self, ball, player)
+   if self == player or not self.auto then
+      self.taget = nil
+   else
+      self.target = A.target(ball, self)
+   end
+end
+
+
+local function player_newball(self, ball)
+   self.collision = false
+
    if self.auto then
       self.target = A.target(ball, self)
    else
-      self.target = nil
+      self.taget = nil
    end
 end
 
@@ -105,12 +116,13 @@ function M.new()
    p.height = C.PADDLE_HEIGHT
    p.angle = math.pi / 2
    p.keys = {}
-   p.target = {}
 
    p.update = player_update
    p.draw = player_draw
    p.keypressed = player_keypressed
-   p.autoplay = player_autoplay
+   p.bounce = player_bounce
+   p.newball = player_newball
+
    return p
 end
 

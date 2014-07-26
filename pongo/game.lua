@@ -108,15 +108,7 @@ local function game_restart(self)
    ball.speed.x = ball_speed * math.cos(ball_angle)
    ball.speed.y = ball_speed * math.sin(ball_angle)
 
-   -- reset players
-   player_1.collision = false
-   player_2.collision = false
-   player_1.target = nil
-   player_2.target = nil
-   -- leave players where they are
-
-   player_1:autoplay(ball)
-   player_2:autoplay(ball)
+   love.event.push('newball')
 end
 
 
@@ -183,6 +175,26 @@ local function game_keypressed(self, key)
 end
 
 
+local function game_bounce(self, ball, player)
+   for _, o in ipairs(self.objects) do
+      local f = o.bounce
+      if f then
+	 f(o, ball, player)
+      end
+   end
+end
+
+
+local function game_newball(self, ball)
+   for _, o in ipairs(self.objects) do
+      local f = o.newball
+      if f then
+	 f(o, ball)
+      end
+   end
+end
+
+
 function M.new()
    local g = {}
    g.player_1 = Player.new()
@@ -197,6 +209,9 @@ function M.new()
    g.draw = game_draw
    g.keypressed = game_keypressed
    g.update = game_update
+
+   g.bounce = game_bounce
+   g.newball = game_newball
 
    return g
 end

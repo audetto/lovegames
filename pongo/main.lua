@@ -96,3 +96,15 @@ function love.joystickpressed(joystick, button)
       love.event.quit()
    end
 end
+
+-- custom events
+
+-- player is a string due to a limitation in love2d framework
+-- where we cannot pass tables as events
+function love.handlers.bounce(player)
+   game:bounce(game.ball, game[player])
+end
+
+function love.handlers.newball()
+   game:newball(game.ball)
+end
