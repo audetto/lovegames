@@ -101,8 +101,8 @@ local function game_restart(self)
    local ball_angle = (math.random() - 0.5) * math.pi / 2
 
    -- so we alternate who gets the ball first
-   ball_angle = ball_angle + (self.head_tails + 1) * math.pi / 2
-   self.heads_tails = -self.head_tails
+   ball_angle = ball_angle + (self.heads_tails + 1) * math.pi / 2
+   self.heads_tails = -self.heads_tails
 
    ball.alive = true
    ball.speed.x = ball_speed * math.cos(ball_angle)
