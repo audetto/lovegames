@@ -13,7 +13,7 @@ local function intersect_x(pos0, x, min_y, max_y)
       local y = inc_x * pos0.vy / pos0.vx + pos0.y
       if y >= min_y and y <= max_y then
 	 local hit_time = pos0.t0 + dt
-	 local pos = {x = x, y = y, vx = pos0.vx, vy = pos0.vy, t0 = hit_time}
+	 local pos = {x = x, y = y, t0 = hit_time, vx = pos0.vx, vy = pos0.vy, playable = pos0.playable}
 	 -- this is the end of the previous segment
 	 pos0.t1 = hit_time
 	 return pos
@@ -32,7 +32,7 @@ local function intersect_y(pos0, y, min_x, max_x)
       local x = inc_y * pos0.vx / pos0.vy + pos0.x
       if x >= min_x and x <= max_x then
 	 local hit_time = pos0.t0 + dt
-	 local pos = {x = x, y = y, vx = pos0.vx, vy = pos0.vy, t0 = hit_time}
+	 local pos = {x = x, y = y, t0 = hit_time, vx = pos0.vx, vy = pos0.vy, playable = pos0.playable}
 	 -- this is the end of the previous segment
 	 pos0.t1 = hit_time
 	 return pos
@@ -66,49 +66,71 @@ local function solve_segment(player, pos)
       local d = math.sqrt(disc)
       local t0 = (-b - d) / a
       local t1 = (-b + d) / a
+      -- according to the sing of a, t0 is >< t1
 
-      -- a bit complicated
-      -- we just search for the smallest fesible time
-      t0, t1 = math.min(t0, t1), math.max(t0, t1)
+      -- all relative to the begin of the segment
+      local max_t = pos.t1 - pos.t0
 
-      -- this actually returns the feasible time interval
-      local z1, z2 = intersection(t0, t1, 0, pos.t1 - pos.t0)
+      -- we want the minimum t, that is feasible and inside the segment (i.e. [0, max_t])
 
-      if z1 and z2 then
-	 local target = {}
-
-	 local target_t = z1
-	 target.t = target_t
-	 -- calculate the ball position at the target time
-	 target.x = pos.x + target_t * pos.vx
-	 target.y = pos.y + target_t * pos.vy
-
-	 return target
+      local target_t
+      if a > 0 then
+	 -- solutions inside [t0, t1]
+	 if t1 < 0 or t0 > max_t then
+	    return nil
+	 end
+	 target_t = math.max(0, t0)
+      else
+	 -- solutions outside [t1, t0]
+	 if t1 >= 0 then
+	    target_t = 0
+	 elseif t0 <= 0 then
+	    target_t = 0
+	 elseif t0 <= max_t then
+	    target_t = t0
+	 else
+	    return nil
+	 end
       end
+
+      local target = {}
+
+      target.t = target_t
+      -- calculate the ball position at the target time
+      target.x = pos.x + target_t * pos.vx
+      target.y = pos.y + target_t * pos.vy
+
+      return target
    end
 end
 
 
 function M.target(ball, player)
-   local pos0 = {x = ball.x, y = ball.y, vx = ball.speed.x, vy = ball.speed.y, t0 = 0}
-
-   local towards_us = ball.speed.x * (player.x - pos0.x) > 0
+   local towards_us = ball.speed.x * (player.x - ball.x) > 0
 
    if towards_us then
-      local counter = 0
-      local playable = false
+      local pos0 = {x = ball.x, y = ball.y, vx = ball.speed.x, vy = ball.speed.y, t0 = 0}
+
+      -- if already playable
+      pos0.playable = (player.center_x - ball.x) * (player.center_x - player.home_x) >= 0
       local pos
 
+      local counter = 0
       repeat
 	 local goal = false
 	 local bounce = false
 
-	 -- first let's check if it gets home
-	 pos = intersect_x(pos0, player.center_x, ball.min_y, ball.max_y)
-	 if pos then
-	    -- it is on our side of the court
-	    playable = true
-	 else
+	 pos = nil
+	 -- first let's check if it gets on our side of court
+	 -- no need if it is already playable
+	 if not pos0.playable then
+	    pos = intersect_x(pos0, player.center_x, ball.min_y, ball.max_y)
+	    if pos then
+	       -- it is on our side of the court
+	       pos.playable = true
+	    end
+	 end
+	 if not pos then
 	    pos = intersect_x(pos0, player.home_x, ball.min_y, ball.max_y)
 	    if pos then
 	       -- goal, this is the last segment
@@ -129,8 +151,8 @@ function M.target(ball, player)
 
 	 if pos then
 	    -- we've just finished a segment
-	    -- try to solve it
-	    if playable then
+	    -- try to solve the previous one, if it was playable!
+	    if pos0.playable then
 	       local target = solve_segment(player, pos0)
 	       if target then
 		  -- if there is a solution, just return it
@@ -138,18 +160,21 @@ function M.target(ball, player)
 	       end
 	    end
 
+	    if bounce then
+	       pos.vy = -pos.vy
+	    end
+
 	    -- start a new segment
 	    pos0 = pos
-
-	    if bounce then
-	       pos0.vy = -pos0.vy
-	    end
 	 end
 
 	 -- just to avoid nasty infinite loops
 	 counter = counter + 1
       until goal or counter == 50
 
+      -- we failed to solve all segments
+      -- return the last position known of the ball
+      -- most likely a goal
       return pos
    end
 end
