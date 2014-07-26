@@ -14,7 +14,7 @@ local function player_draw(self)
 
    local t = self.target
    if t then
-      love.graphics.circle('fill', t.x, t.y, 20, 10)
+      love.graphics.circle('line', t.x, t.y, C.BALL_RADIUS, 10)
    end
 end
 

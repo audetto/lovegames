@@ -48,7 +48,7 @@ local function game_setup(self)
    player_1.keys.auto = "q"
 
    -- player 2
-   player_2.color = {255, 255, 0}
+   player_2.color = {0, 255, 0}
    player_2.x = self.max_of_game
    player_2.y = self.height / 2
    player_2.min_y = 0
@@ -134,7 +134,7 @@ local function game_draw_court(self)
 
    -- points
    love.graphics.setColor(123, 204, 40)
-   love.graphics.print(player_1.points .. " : " .. player_2.points, 300, 300)
+   love.graphics.printf(player_1.points .. " : " .. player_2.points, 0, 100, self.width, 'center')
 end
 
 
