@@ -197,8 +197,8 @@ end
 
 function M.new()
    local g = {}
-   g.player_1 = Player.new()
-   g.player_2 = Player.new()
+   g.player_1 = Player.new("autoplay")
+   g.player_2 = Player.new("autoplay")
 
    g.ball = Ball.new()
    g.goal = Goal.new()

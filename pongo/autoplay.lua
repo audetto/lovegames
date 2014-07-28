@@ -41,17 +41,6 @@ local function intersect_y(pos0, y, min_x, max_x)
 end
 
 
--- intersection of [x1, x2] and [y1, y2]
-local function intersection(x1, x2, y1, y2)
-   local z1 = math.max(x1, y1)
-   local z2 = math.min(x2, y2)
-
-   if z2 >= z1 then
-      return z1, z2
-   end
-end
-
-
 local function solve_segment(player, pos)
    local dx = pos.x - player.x
    local dy = pos.y - player.y
@@ -105,8 +94,11 @@ local function solve_segment(player, pos)
 end
 
 
-function M.target(ball, player)
-   local towards_us = ball.speed.x * (player.x - ball.x) > 0
+-- called after the ball get a new external direction
+-- either we hit, opponent hits or kick off
+function M.bounce(player, ball)
+   -- check if the ball is going towards our goal line
+   local towards_us = ball.speed.x * (player.home_x - ball.x) > 0
 
    if towards_us then
       local pos0 = {x = ball.x, y = ball.y, vx = ball.speed.x, vy = ball.speed.y, t0 = 0}
@@ -176,7 +168,23 @@ function M.target(ball, player)
       -- return the last position known of the ball
       -- most likely a goal
       return pos
+   else
+      -- ball is going towards the other player
+      -- we just go to some rest position in the middle of our court
+      -- 10% away from the goal line
+      local x = player.home_x + (player.center_x - player.home_x) * 0.1
+      -- half in the y direction
+      local target = {x = x, y = 0.5 * (player.min_y + player.max_y)}
+      return target
    end
 end
+
+
+-- called on each update
+-- e.g. if we simply want to track the ball
+function M.update(player, ball, target)
+   return target
+end
+
 
 return M

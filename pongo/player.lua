@@ -1,5 +1,4 @@
 local C = require("constants")
-local A = require("autoplay")
 
 local M = {}
 
@@ -23,24 +22,22 @@ local function player_update(self, dt, game)
    local ball = game.ball
 
    if self.auto then
+      self.target = self.autoplay.update(self, ball, self.target)
       local t = self.target
-      if not t then
-	 local x = self.home_x + (self.center_x - self.home_x) * 0.1
-	 t = {x = x, y = 0.5 * (self.min_y + self.max_y)}
+      if t then
+	 local sx = (t.x - self.x) / dt
+	 local sy = (t.y - self.y) / dt
+
+	 local speed = math.sqrt(sx * sx + sy * sy)
+	 if speed > C.PADDLE_SPEED then
+	    local ratio = C.PADDLE_SPEED / speed
+	    sx = sx * ratio
+	    sy = sy * ratio
+	 end
+
+	 self.speed.x = sx * 0.98
+	 self.speed.y = sy * 0.98
       end
-
-      local sx = (t.x - self.x) / dt
-      local sy = (t.y - self.y) / dt
-
-      local speed = math.sqrt(sx * sx + sy * sy)
-      if speed > C.PADDLE_SPEED then
-	 local ratio = C.PADDLE_SPEED / speed
-	 sx = sx * ratio
-	 sy = sy * ratio
-      end
-
-      self.speed.x = sx
-      self.speed.y = sy
    else
       local coeff_x = 0
       local coeff_y = 0
@@ -87,10 +84,10 @@ end
 
 
 local function player_bounce(self, ball, player)
-   if self == player or not self.auto then
-      self.taget = nil
+   if self.auto then
+      self.target = self.autoplay.bounce(self, ball)
    else
-      self.target = A.target(ball, self)
+      self.target = nil
    end
 end
 
@@ -99,14 +96,14 @@ local function player_newball(self, ball)
    self.collision = false
 
    if self.auto then
-      self.target = A.target(ball, self)
+      self.target = self.autoplay.bounce(self, ball)
    else
-      self.taget = nil
+      self.target = nil
    end
 end
 
 
-function M.new()
+function M.new(strategy)
    local p = {}
    p.auto = false
    p.points = 0
@@ -116,6 +113,11 @@ function M.new()
    p.height = C.PADDLE_HEIGHT
    p.angle = math.pi / 2
    p.keys = {}
+
+   local st = require(strategy)
+   p.autoplay = {}
+   p.autoplay.bounce = st.bounce
+   p.autoplay.update = st.update
 
    p.update = player_update
    p.draw = player_draw
