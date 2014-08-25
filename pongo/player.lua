@@ -25,18 +25,32 @@ local function player_update(self, dt, game)
       self.target = self.autoplay.update(self, ball, self.target)
       local t = self.target
       if t then
-	 local sx = (t.x - self.x) / dt
-	 local sy = (t.y - self.y) / dt
-
-	 local speed = math.sqrt(sx * sx + sy * sy)
-	 if speed > C.PADDLE_SPEED then
-	    local ratio = C.PADDLE_SPEED / speed
-	    sx = sx * ratio
-	    sy = sy * ratio
+	 -- with dt, we get there as fast as possible (i.e. in 1 frame)
+	 local target_time
+	 if t.t then
+	    target_time = t.t
+	    -- for next time
+	    t.t = target_time - dt
+	 else
+	    target_time = dt
 	 end
 
-	 self.speed.x = sx * 0.98
-	 self.speed.y = sy * 0.98
+	 -- if target_time <= 0, it means we got there too early
+	 -- just keep going... so the impact will have some speed
+	 if target_time > 0 then
+	    local sx = (t.x - self.x) / target_time
+	    local sy = (t.y - self.y) / target_time
+
+	    local speed = math.sqrt(sx * sx + sy * sy)
+	    if speed > C.PADDLE_SPEED then
+	       local ratio = C.PADDLE_SPEED / speed
+	       sx = sx * ratio
+	       sy = sy * ratio
+	    end
+
+	    self.speed.x = sx
+	    self.speed.y = sy
+	 end
       end
    else
       local coeff_x = 0

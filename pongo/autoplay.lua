@@ -2,6 +2,35 @@ local C = require("constants")
 
 local M = {}
 
+-- apply deceleration
+local function apply_deceleration(t, v0_x, v0_y, deceleration)
+   local speed2 = v0_x * v0_x + v0_y * v0_y
+   local speed = math.sqrt(speed2)
+   local disc = speed2 - 2 * deceleration * speed * t
+   -- if disc < 0, then the ball will never get there
+   -- as it will stop sooner due to deceleration
+
+   if disc >= 0 then
+      local adjusted_t = (speed - math.sqrt(disc)) / deceleration
+      return adjusted_t
+   end
+end
+
+
+-- home target
+local function home_target(player, ball)
+   -- ball is going towards the other player
+   -- we just go to some rest position in the middle of our court
+   -- 10% away from the goal line
+
+   -- or when we do not know where to go
+   local x = player.home_x + (player.center_x - player.home_x) * 0.1
+   -- half in the y direction
+   local target = {x = x, y = ball.y, track = ball}
+   return target
+end
+
+
 -- maybe we should merge the 2 functions below
 local function intersect_x(pos0, x, min_y, max_y)
    local inc_x = x - pos0.x
@@ -41,7 +70,7 @@ local function intersect_y(pos0, y, min_x, max_x)
 end
 
 
-local function solve_segment(player, pos)
+local function solve_segment(player, pos, ball)
    local dx = pos.x - player.x
    local dy = pos.y - player.y
 
@@ -82,12 +111,29 @@ local function solve_segment(player, pos)
 	 end
       end
 
-      local target = {}
+      -- rebase the target time to be absolute
+      local absolute_t = target_t + pos.t0
 
-      target.t = target_t
-      -- calculate the ball position at the target time
-      target.x = pos.x + target_t * pos.vx
-      target.y = pos.y + target_t * pos.vy
+      -- take into account ball deceleration
+      -- to be exact we should take this into account while solving
+      -- but it gets complicated and we only readjust
+      -- the hit point time
+      local adjusted_t = apply_deceleration(absolute_t, pos.vx, pos.vy, C.BALL_DECELERATION)
+
+      local target
+      if adjusted_t then
+	 target = {}
+
+	 -- calculate the ball position at the target time
+	 target.x = pos.x + target_t * pos.vx
+	 target.y = pos.y + target_t * pos.vy
+
+	 target.t = adjusted_t
+      else
+	 -- ball will stop sooner
+	 -- just go back home
+	 target = home_target(player, ball)
+      end
 
       return target
    end
@@ -145,7 +191,7 @@ function M.bounce(player, ball)
 	    -- we've just finished a segment
 	    -- try to solve the previous one, if it was playable!
 	    if pos0.playable then
-	       local target = solve_segment(player, pos0)
+	       local target = solve_segment(player, pos0, ball)
 	       if target then
 		  -- if there is a solution, just return it
 		  return target
@@ -169,12 +215,7 @@ function M.bounce(player, ball)
       -- most likely a goal
       return pos
    else
-      -- ball is going towards the other player
-      -- we just go to some rest position in the middle of our court
-      -- 10% away from the goal line
-      local x = player.home_x + (player.center_x - player.home_x) * 0.1
-      -- half in the y direction
-      local target = {x = x, y = 0.5 * (player.min_y + player.max_y)}
+      local target = home_target(player, ball)
       return target
    end
 end
@@ -183,6 +224,9 @@ end
 -- called on each update
 -- e.g. if we simply want to track the ball
 function M.update(player, ball, target)
+   if target and target.track then
+      target.y = target.track.y
+   end
    return target
 end
 
