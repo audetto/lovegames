@@ -107,6 +107,7 @@ local function game_restart(self)
    ball.alive = true
    ball.speed.x = ball_speed * math.cos(ball_angle)
    ball.speed.y = ball_speed * math.sin(ball_angle)
+   ball.speed.abs = ball_speed
 
    love.event.push('newball')
 end
@@ -115,18 +116,38 @@ end
 local function game_draw_court(self)
    local player_1 = self.player_1
    local player_2 = self.player_2
+   local ball = self.ball
+
+   local center_x = self.width / 2
+   local center_y = self.height / 2
 
    -- court
    love.graphics.setColor(255, 255, 0)
    love.graphics.line(self.min_of_game, 0, self.min_of_game, self.height)
    love.graphics.line(self.max_of_game, 0, self.max_of_game, self.height)
-   love.graphics.line(self.width / 2, self.height * 2 / 5 , self.width / 2, self.height * 3 / 5)
+   love.graphics.line(center_x, self.height * 2 / 5, center_x, self.height * 3 / 5)
    love.graphics.rectangle('line', 0, 0, self.width, self.height)
-   love.graphics.circle('line', self.width / 2, self.height / 2, 10, 10)
+   love.graphics.circle('line', center_x, center_y, 10, 10)
 
    -- points
    love.graphics.setColor(123, 204, 40)
-   love.graphics.printf(player_1.points .. " : " .. player_2.points, 0, 100, self.width, 'center')
+   love.graphics.printf(player_1.points .. " : " .. player_2.points, 0, 50, self.width, 'center')
+
+   -- speeds
+   local bar = 200
+   local left_x = center_x - bar / 2
+   local up_y = self.height - 50
+   local pos = ball.speed.abs / C.BALL_INITIAL_SPEED * bar
+   local min = C.BALL_MINIMUM_SPEED / C.BALL_INITIAL_SPEED * bar
+
+   love.graphics.setColor(0, 255, 255)
+   love.graphics.rectangle('fill', left_x, up_y, pos, 10)
+
+   love.graphics.setColor(255, 0, 0)
+   love.graphics.rectangle('fill', left_x, up_y, min, 10)
+
+   love.graphics.setColor(255, 255, 255)
+   love.graphics.rectangle('line', left_x, up_y, bar, 10)
 end
 
 

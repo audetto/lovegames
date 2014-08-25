@@ -3,13 +3,13 @@ local C = require("constants")
 local M = {}
 
 local function ball_draw(self)
+   love.graphics.setColor(self.color)
+
    if self.help then
-      love.graphics.setColor(255, 218, 185)
       local dt = 1 -- 1 sec ahead
       love.graphics.line(self.x, self.y, self.x + self.speed.x * dt, self.y + self.speed.y * dt)
    end
 
-   love.graphics.setColor(self.color)
    love.graphics.circle('fill', self.x, self.y, self.r, 10)
 end
 
@@ -23,11 +23,11 @@ local function ball_update(self, dt, game)
    self.x = self.x + s_x * dt
    self.y = self.y + s_y * dt
 
-   local speed = math.sqrt(s_x * s_x + s_y * s_y)
-   self.alive = speed > C.BALL_MINIMUM_SPEED
+   self.speed.abs = math.sqrt(s_x * s_x + s_y * s_y)
+   self.alive = self.speed.abs > C.BALL_MINIMUM_SPEED
 
    -- we will loose C.BALL_DECELERATION speed per second
-   local coeff = 1 - C.BALL_DECELERATION * dt / speed
+   local coeff = 1 - C.BALL_DECELERATION * dt / self.speed.abs
    self.speed.x = s_x * coeff
    self.speed.y = s_y * coeff
 
@@ -84,6 +84,7 @@ function M.new()
    b.speed = {}
    b.speed.x = 0
    b.speed.y = 0
+   b.speed.abs = 0
 
    b.update = ball_update
    b.draw = ball_draw

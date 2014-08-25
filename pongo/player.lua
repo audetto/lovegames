@@ -51,6 +51,8 @@ local function player_update(self, dt, game)
 	    self.speed.x = sx
 	    self.speed.y = sy
 	 end
+
+	 self.angle = t.angle or self.angle
       end
    else
       local coeff_x = 0

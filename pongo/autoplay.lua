@@ -3,9 +3,9 @@ local C = require("constants")
 local M = {}
 
 -- apply deceleration
-local function apply_deceleration(t, v0_x, v0_y, deceleration)
-   local speed2 = v0_x * v0_x + v0_y * v0_y
-   local speed = math.sqrt(speed2)
+local function apply_deceleration(t, ball, deceleration)
+   local speed = ball.speed.abs
+   local speed2 = speed * speed
    local disc = speed2 - 2 * deceleration * speed * t
    -- if disc < 0, then the ball will never get there
    -- as it will stop sooner due to deceleration
@@ -18,7 +18,7 @@ end
 
 
 -- home target
-local function home_target(player, ball)
+local function home_target(player, track)
    -- ball is going towards the other player
    -- we just go to some rest position in the middle of our court
    -- 10% away from the goal line
@@ -26,7 +26,7 @@ local function home_target(player, ball)
    -- or when we do not know where to go
    local x = player.home_x + (player.center_x - player.home_x) * 0.1
    -- half in the y direction
-   local target = {x = x, y = ball.y, track = ball}
+   local target = {x = x, y = track.y, track = track}
    return target
 end
 
@@ -118,7 +118,7 @@ local function solve_segment(player, pos, ball)
       -- to be exact we should take this into account while solving
       -- but it gets complicated and we only readjust
       -- the hit point time
-      local adjusted_t = apply_deceleration(absolute_t, pos.vx, pos.vy, C.BALL_DECELERATION)
+      local adjusted_t = apply_deceleration(absolute_t, ball, C.BALL_DECELERATION)
 
       local target
       if adjusted_t then
@@ -132,7 +132,7 @@ local function solve_segment(player, pos, ball)
       else
 	 -- ball will stop sooner
 	 -- just go back home
-	 target = home_target(player, ball)
+	 target = home_target(player, {y = (player.min_y + player.max_y) / 2})
       end
 
       return target
@@ -194,6 +194,11 @@ function M.bounce(player, ball)
 	       local target = solve_segment(player, pos0, ball)
 	       if target then
 		  -- if there is a solution, just return it
+		  -- plus we add some randomness on the angle
+		  local half_y = (player.min_y + player.max_y) / 2
+		  local coeff = target.y > half_y and -1 or 1
+		  target.angle = coeff * math.random() * math.pi / 8 + math.pi / 2
+
 		  return target
 	       end
 	    end
