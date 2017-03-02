@@ -4,8 +4,7 @@ local canvas = require("canvas")
 local position = require("position")
 local vector = require("vector")
 
-
-require("../strict")
+-- require("../strict")
 
 local function init()
    local car = {}
@@ -25,9 +24,6 @@ local function init()
 
    car.c1 = cube.new(car.p1, car.p2)
    car.c2 = cube.new({x = 10, y = 12, z = 0}, {x = 12, y = 0, z = -4})
-
-   local joysticks = love.joystick.getJoysticks()
-   car.joystick = joysticks[1]
 
    car.coeff = 0
    car.coeff_x = 0
@@ -110,5 +106,45 @@ function love.gamepadaxis(joystick, axis, value)
       car.coeff_z = -value * value * value
    elseif axis == righty then
       car.coeff_x = value * value * value
+   end
+end
+
+local w = "w"
+local s = "s"
+local up = "up"
+local down = "down"
+local left = "left"
+local right = "right"
+
+function love.keypressed(key)
+   -- half speed with the keyboard
+   if key == w then
+      car.coeff = 0.5
+   elseif key == s then
+      car.coeff = -0.5
+   elseif key == up then
+      car.coeff_x = 0.5
+   elseif key == down then
+      car.coeff_x = -0.5
+   elseif key == left then
+      car.coeff_z = 0.5
+   elseif key == right then
+      car.coeff_z = -0.5
+   end
+end
+
+function love.keyreleased(key)
+   if key == w then
+      car.coeff = 0
+   elseif key == s then
+      car.coeff = 0
+   elseif key == up then
+      car.coeff_x = 0
+   elseif key == down then
+      car.coeff_x = 0
+   elseif key == left then
+      car.coeff_z = 0
+   elseif key == right then
+      car.coeff_z = 0
    end
 end
