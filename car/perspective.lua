@@ -43,17 +43,48 @@ end
 local function projection(self, point)
    local srt = self:SRT(point)
    local ret = {x = srt.x / srt.y, z = srt.z / srt.y}
-   return ret
+   return ret, srt
+end
+
+local function line(self, a, b)
+   local pa, ra = self:projection(a)
+   local pb, rb = self:projection(b)
+
+   if ra.y <= self.eps and rb.y <= self.eps then
+      return
+   end
+
+   if ra.y <= self.eps then
+      pa, ra, pb, rb = pb, rb, pa, ra
+   end
+
+   if rb.y <= self.eps then
+      local weight_a = (self.eps - rb.y) / (ra.y - rb.y)
+
+      local new_x = ra.x * weight_a  + rb.x * (1 - weight_a)
+      local new_z = ra.z * weight_a  + rb.z * (1 - weight_a)
+
+      -- this is basically an other projection
+      pb.x = new_x / self.eps
+      pb.z = new_z / self.eps
+   end
+
+   return pa, pb
 end
 
 local function new()
    local p = {}
+
+   p.eps = 0.01
+
    p.T = T
    p.R = R
    p.S = S
    p.SRT = SRT
    p.camera = camera
    p.projection = projection
+   p.line = line
+
    return p
 end
 

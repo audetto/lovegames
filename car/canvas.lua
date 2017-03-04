@@ -7,12 +7,14 @@ local function convert(self, point)
 end
 
 local function line(self, a, b)
-   local pa = self.perspective:projection(a)
-   local pb = self.perspective:projection(b)
-   local ax, ay = self:convert(pa)
-   local bx, by = self:convert(pb)
+   local pa, pb = self.perspective:line(a, b)
 
-   love.graphics.line(ax, ay , bx, by)
+   if pa and pb then
+      local ax, ay = self:convert(pa)
+      local bx, by = self:convert(pb)
+
+      love.graphics.line(ax, ay, bx, by)
+   end
 end
 
 local function new(perspective, scale)
