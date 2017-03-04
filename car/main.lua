@@ -10,7 +10,8 @@ local function init()
    local car = {}
 
    car.P = perspective.new()
-   car.direction =  {x = 0, y = 20, z = 0}
+   car.direction =  {x = 0, y = 1, z = 0}
+   car.speed = 5
 
    car.eye = position.new({x = 11, y = -15, z = 2})
 
@@ -70,9 +71,9 @@ function love.draw()
    infinity(car.cnv3d, car.p1, car.p2)
 
    love.graphics.setColor(255, 255, 255)
-   love.graphics.print("Position: " .. vector.toString(car.eye.pos, 2), 500, 500)
-   love.graphics.print("Direction: " .. vector.toString(car.direction, 2), 500, 520)
-   love.graphics.print("FPS: " .. vector.round(1 / car.dt, 2), 500, 540)
+   love.graphics.print("Position: " .. vector.toString(car.eye.pos, 0.01), 400, 520)
+   love.graphics.print("Direction: " .. vector.toString(car.direction, 0.01), 400, 540)
+   love.graphics.print("FPS: " .. math.floor(1 / car.dt), 400, 560)
 end
 
 function love.update(dt)
@@ -80,18 +81,10 @@ function love.update(dt)
    car.dt = dt
    car.direction = vector.rotate(car.direction, deg * car.coeff_x, deg * car.coeff_y, deg * car.coeff_z)
 
-   car.eye:update(dt, car.direction, car.coeff)
+   car.eye:update(dt, car.direction, car.coeff * car.speed)
 
    car.centre = vector.add(car.eye.pos, car.direction)
    car.P:camera(car.eye.pos, car.centre)
-end
-
-function love.gamepadpressed(joystick, button)
-   print("pressed ", button)
-end
-
-function love.gamepadreleased(joystick, button)
-   print("released ", button)
 end
 
 local leftx = "leftx"

@@ -1,16 +1,8 @@
 local M = {}
 
-local function round(val, decimal)
-   if decimal then
-      local t = 10 ^ decimal
-      return math.floor(((val * t) + 0.5) / t)
-   else
-      return val
-   end
-end
-
 local function toString(a, decimal)
-   return "{ x = " .. round(a.x, decimal) .. ", y = " .. round(a.y, decimal) .. ", z = " .. round(a.z, decimal) .. " } "
+   local str = string.format("{ x = %.2f, y = %.2f, x = %.2f }", a.x, a.y, a.x)
+   return str
 end
 
 local function add(a, b)
