@@ -56,15 +56,23 @@ local function camera(self, eye, direction, sign)
    self.s2 = rdp.z / r2 * sign
 end
 
-local function projection(self, point)
-   local srt = self:SRT(point)
+local function projection(self, point, relative)
+   local srt
+   if relative then
+      -- it would be nice to remove the sign
+      -- so that we have relative ahead and behind
+      -- while it is always relative ahead now
+      srt = point
+   else
+      srt = self:SRT(point)
+   end
    local ret = {x = srt.x / srt.y, z = srt.z / srt.y}
    return ret, srt
 end
 
-local function line(self, a, b)
-   local pa, ra = self:projection(a)
-   local pb, rb = self:projection(b)
+local function line(self, a, b, relative)
+   local pa, ra = self:projection(a, relative)
+   local pb, rb = self:projection(b, relative)
 
    if ra.y <= self.eps and rb.y <= self.eps then
       return

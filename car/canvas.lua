@@ -1,3 +1,5 @@
+local vector = require("vector")
+
 local M = {}
 
 local function convert(self, point)
@@ -6,8 +8,8 @@ local function convert(self, point)
    return x, y
 end
 
-local function line(self, a, b)
-   local pa, pb = self.perspective:line(a, b)
+local function line(self, a, b, relative)
+   local pa, pb = self.perspective:line(a, b, relative)
 
    if pa and pb then
       local ax, ay = self:convert(pa)
@@ -17,12 +19,22 @@ local function line(self, a, b)
    end
 end
 
+local function lines(self, points)
+   for _, value in ipairs(points) do
+      if value.color then
+	 love.graphics.setColor(value.color)
+      end
+      self:line(value.a, value.b, value.relative)
+   end
+end
+
 local function new(perspective, scale)
    local c = {}
 
    c.perspective = perspective
    c.convert = convert
    c.line = line
+   c.lines = lines
 
    c.scale = scale
    c.width = love.graphics.getWidth()

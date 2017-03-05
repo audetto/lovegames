@@ -8,6 +8,51 @@ local colors = require("colors")
 
 require("../strict")
 
+local function viewfinder()
+   local points = {}
+
+   local size = 0.5
+   local dist = 10
+
+   local a1 = {x = -size, y = dist, z = 0}
+   local b1 = {x = size, y = dist, z = 0}
+   table.insert(points, {a = a1, b = b1, relative = true})
+
+   local a2 = {x = 0, y = dist, z = size}
+   local b2 = {x = 0, y = dist, z = -size}
+   table.insert(points, {a = a2, b = b2, relative = true})
+
+   return points
+end
+
+local function boundaries(p1, p2)
+   local points = {}
+
+   love.graphics.setColor(colors.gray)
+
+   local inf = 100
+
+   local a4_inf = {x = p1.x, y = inf, z = p1.z}
+   local a4 = {x = p1.x, y = p2.y, z = p1.z}
+   table.insert(points, {a = a4, b = a4_inf, color = colors.gray})
+
+   local a3_inf = {x = p2.x, y = inf, z = p1.z}
+   local a3 = {x = p2.x, y = p2.y, z = p1.z}
+   table.insert(points, {a = a3, b = a3_inf, color = colors.gray})
+
+   local left_most_ahead = {x = -inf, y = inf, z = 0}
+   local right_most_ahead = {x = inf, y = inf, z = 0}
+   local left_most_behind = {x = -inf, y = -inf, z = 0}
+   local right_most_behind = {x = inf, y = -inf, z = 0}
+
+   table.insert(points, {a = left_most_ahead, b = right_most_ahead, color = colors.magenta})
+   table.insert(points, {a = right_most_ahead, b = right_most_behind, color = colors.maroon})
+   table.insert(points, {a = right_most_behind, b = left_most_behind, color = colors.purple})
+   table.insert(points, {a = left_most_behind, b = left_most_ahead, color = colors.teal})
+
+   return points
+end
+
 local function init()
    local car = {}
 
@@ -15,16 +60,21 @@ local function init()
    car.direction = {x = 0, y = 1, z = 0}
    car.dir_sign = 1
    car.speed = 5
+   car.north = {x = 0, y = 0, z = 1}
 
    car.eye = position.new({x = 11, y = -15, z = 2})
    car.P:camera(car.eye.pos, car.direction, car.dir_sign)
 
    car.cnv3d = canvas.new(car.P, 500)
-   car.p1 = {x = 0, y = 0, z = 0}
-   car.p2 =  {x = 7, y = 9, z = 3}
 
-   car.c1 = cube.new(car.p1, car.p2)
+   local p1 = {x = 0, y = 0, z = 0}
+   local p2 =  {x = 7, y = 9, z = 3}
+
+   car.c1 = cube.new(p1, p2)
    car.c2 = cube.new({x = 10, y = 12, z = 0}, {x = 12, y = 0, z = -4})
+
+   car.viewfinder = viewfinder()
+   car.boundaries = boundaries(p1, p2)
 
    local pos_clock = {x = 0, y = 50, z = 30}
 
@@ -40,53 +90,6 @@ end
 
 local car = init()
 
-local function infinity(cnv3d, p1, p2)
-   love.graphics.setColor(colors.gray)
-
-   local inf = 100
-
-   local a4_inf = {x = p1.x, y = inf, z = p1.z}
-   local a4 = {x = p1.x, y = p2.y, z = p1.z}
-   cnv3d:line(a4, a4_inf)
-
-   local a3_inf = {x = p2.x, y = inf, z = p1.z}
-   local a3 = {x = p2.x, y = p2.y, z = p1.z}
-   cnv3d:line(a3, a3_inf)
-
-   local left_most_ahead = {x = -inf, y = inf, z = 0}
-   local right_most_ahead = {x = inf, y = inf, z = 0}
-   local left_most_behind = {x = -inf, y = -inf, z = 0}
-   local right_most_behind = {x = inf, y = -inf, z = 0}
-
-   love.graphics.setColor(colors.magenta)
-   cnv3d:line(left_most_ahead, right_most_ahead)
-   love.graphics.setColor(colors.maroon)
-   cnv3d:line(right_most_ahead, right_most_behind)
-   love.graphics.setColor(colors.purple)
-   cnv3d:line(right_most_behind, left_most_behind)
-   love.graphics.setColor(colors.teal)
-   cnv3d:line(left_most_behind, left_most_ahead)
-end
-
-local function c(car)
-   local centre = vector.axpy(car.dir_sign, car.direction, car.eye.pos)
-   local p = car.P:projection(centre)
-   local ax, ay = car.cnv3d:convert(p)
-   love.graphics.setColor(colors.red)
-   local mode = (car.dir_sign > 0) and "fill" or "line"
-   love.graphics.circle(mode, ax, ay, 5)
-end
-
-local function fps(car, dt)
-   local current = 1 / dt
-   if not car.fps then
-      car.fps = current
-   end
-
-   local alpha = math.exp(-dt)
-   car.fps = car.fps * alpha + current * (1 - alpha)
-end
-
 function love.draw()
    love.graphics.setColor(colors.yellow)
    car.c1:draw(car.cnv3d)
@@ -94,17 +97,25 @@ function love.draw()
    love.graphics.setColor(colors.silver)
    car.c2:draw(car.cnv3d)
 
-   c(car)
-
-   infinity(car.cnv3d, car.p1, car.p2)
+   car.cnv3d:lines(car.boundaries)
 
    car.clock:draw(car.cnv3d)
 
+   if car.dir_sign > 0 then
+      love.graphics.setColor(colors.red)
+   else
+      love.graphics.setColor(colors.cyan)
+   end
+
+   car.cnv3d:lines(car.viewfinder)
+
    love.graphics.setColor(colors.white)
 
-   love.graphics.print("Position: " .. vector.toString(car.eye.pos), 400, 520)
-   love.graphics.print("Direction: " .. vector.toString(car.direction), 400, 535)
-   love.graphics.print("FPS: " .. math.floor(car.fps), 400, 560)
+   love.graphics.print("Position: " .. vector.toString(car.eye.pos), 400, 500)
+   love.graphics.print("Direction: " .. vector.toString(car.direction), 400, 515)
+   local angle = vector.angle(car.direction, car.north) / (math.pi * 2) * 360
+   love.graphics.print(string.format("North: %6.1f", angle), 400, 530)
+   love.graphics.print("FPS: " .. love.timer.getFPS(), 400, 545)
 end
 
 function love.update(dt)
@@ -117,8 +128,6 @@ function love.update(dt)
    car.eye:update(dt, car.direction, car.coeff * car.speed)
 
    car.P:camera(car.eye.pos, car.direction, car.dir_sign)
-
-   fps(car, dt)
 end
 
 function love.gamepadaxis(joystick, axis, value)

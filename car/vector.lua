@@ -31,6 +31,20 @@ local function norm(a, b, c)
    return ret
 end
 
+local function dot(a, b)
+   local ret = a.x * b.x + a.y * b.y + a.z * b.z
+   return ret
+end
+
+local function angle(a, b)
+   local d = dot(a, b)
+   local na = norm(a.x, a.y, a.z)
+   local nb = norm(b.x, b.y, b.z)
+
+   local ac = d / (na * nb)
+   return math.acos(ac)
+end
+
 local function rotate(a, angle_x, angle_y, angle_z)
    local ret = a
 
@@ -52,6 +66,8 @@ M.sub = sub
 M.mul = mul
 M.norm = norm
 M.axpy = axpy
+M.dot = dot
+M.angle = angle
 M.toString = toString
 M.rotate = rotate
 M.round = round
