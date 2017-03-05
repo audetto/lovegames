@@ -1,7 +1,7 @@
 local M = {}
 
 local function toString(a, decimal)
-   local str = string.format("{ x = %.2f, y = %.2f, x = %.2f }", a.x, a.y, a.x)
+   local str = string.format("{ x = %8.2f, y = %8.2f, z = %8.2f }", a.x, a.y, a.z)
    return str
 end
 
@@ -10,6 +10,7 @@ local function add(a, b)
    return ret
 end
 
+-- result = scale * a + b
 local function axpy(scale, a, b)
    local ret = {x = scale * a.x + b.x, y = scale * a.y + b.y, z = scale * a.z + b.z}
    return ret
@@ -17,6 +18,11 @@ end
 
 local function sub(a, b)
    local ret = {x = a.x - b.x, y = a.y - b.y, z = a.z - b.z}
+   return ret
+end
+
+local function mul(scale, a)
+   local ret = {x = scale * a.x, y = scale * a.y, z = scale * a.z}
    return ret
 end
 
@@ -43,6 +49,7 @@ end
 
 M.add = add
 M.sub = sub
+M.mul = mul
 M.norm = norm
 M.axpy = axpy
 M.toString = toString

@@ -10,14 +10,12 @@ local function init()
    local car = {}
 
    car.P = perspective.new()
-   car.direction =  {x = 0, y = 1, z = 0}
+   car.direction = {x = 0, y = 1, z = 0}
+   car.dir_sign = 1
    car.speed = 5
 
    car.eye = position.new({x = 11, y = -15, z = 2})
-
-   car.centre = vector.add(car.eye.pos, car.direction)
-
-   car.P:camera(car.eye.pos, car.centre)
+   car.P:camera(car.eye.pos, car.direction, car.dir_sign)
 
    car.cnv3d = canvas.new(car.P, 500)
    car.p1 = {x = 0, y = 0, z = 0}
@@ -39,30 +37,38 @@ local car = init()
 local function infinity(cnv3d, p1, p2)
    love.graphics.setColor(0, 0, 255)
 
-   local a4_inf = {x = p1.x, y = 10000, z = p1.z}
+   local inf = 100
+
+   local a4_inf = {x = p1.x, y = inf, z = p1.z}
    local a4 = {x = p1.x, y = p2.y, z = p1.z}
    cnv3d:line(a4, a4_inf)
 
-   local a3_inf = {x = p2.x, y = 10000, z = p1.z}
+   local a3_inf = {x = p2.x, y = inf, z = p1.z}
    local a3 = {x = p2.x, y = p2.y, z = p1.z}
    cnv3d:line(a3, a3_inf)
 
-   local left_most = {x = -10000, y = 10000, z = 0}
-   local right_most = {x = 10000, y = 10000, z = 0}
-   cnv3d:line(left_most, right_most)
+   local left_most_ahead = {x = -inf, y = inf, z = 0}
+   local right_most_ahead = {x = inf, y = inf, z = 0}
+   local left_most_behind = {x = -inf, y = -inf, z = 0}
+   local right_most_behind = {x = inf, y = -inf, z = 0}
+   cnv3d:line(left_most_ahead, right_most_ahead)
+   cnv3d:line(right_most_ahead, right_most_behind)
+   cnv3d:line(right_most_behind, left_most_behind)
+   cnv3d:line(left_most_behind, left_most_ahead)
 end
 
 local function c(car)
-   local p = car.P:projection(car.centre)
+   local centre = vector.axpy(car.dir_sign, car.direction, car.eye.pos)
+   local p = car.P:projection(centre)
    local ax, ay = car.cnv3d:convert(p)
    love.graphics.setColor(255, 0, 0)
-   love.graphics.circle("fill", ax, ay, 5)
+   local mode = (car.dir_sign > 0) and "fill" or "line"
+   love.graphics.circle(mode, ax, ay, 5)
 end
 
 local function fps(car, dt)
    local current = 1 / dt
    if not car.fps then
-      print(dt)
       car.fps = current
    end
 
@@ -82,74 +88,78 @@ function love.draw()
    infinity(car.cnv3d, car.p1, car.p2)
 
    love.graphics.setColor(255, 255, 255)
-   love.graphics.print("Position: " .. vector.toString(car.eye.pos, 0.01), 400, 520)
-   love.graphics.print("Direction: " .. vector.toString(car.direction, 0.01), 400, 540)
+
+   love.graphics.print("Position: " .. vector.toString(car.eye.pos), 400, 520)
+   love.graphics.print("Direction: " .. vector.toString(car.direction), 400, 535)
    love.graphics.print("FPS: " .. math.floor(car.fps), 400, 560)
 end
 
 function love.update(dt)
    local deg = dt * math.pi / 4
-   car.direction = vector.rotate(car.direction, deg * car.coeff_x, deg * car.coeff_y, deg * car.coeff_z)
+   -- needs to be simplified!
+   local relative = car.P:rotation(car.direction)
+   relative = vector.rotate(relative, deg * car.coeff_x, deg * car.coeff_y, deg * car.coeff_z)
+   car.direction = car.P:rotation(relative, -1)
 
    car.eye:update(dt, car.direction, car.coeff * car.speed)
 
-   car.centre = vector.add(car.eye.pos, car.direction)
-   car.P:camera(car.eye.pos, car.centre)
+   car.P:camera(car.eye.pos, car.direction, car.dir_sign)
 
    fps(car, dt)
 end
 
-local leftx = "leftx"
-local lefty = "lefty"
-local rightx = "rightx"
-local righty = "righty"
-
 function love.gamepadaxis(joystick, axis, value)
-   if axis == lefty then
+   if axis == "lefty" then
       car.coeff = -value * value * value
-   elseif axis == rightx then
+   elseif axis == "rightx" then
       car.coeff_z = -value * value * value
-   elseif axis == righty then
+   elseif axis == "righty" then
       car.coeff_x = value * value * value
    end
 end
 
-local w = "w"
-local s = "s"
-local up = "up"
-local down = "down"
-local left = "left"
-local right = "right"
-
 function love.keypressed(key)
    -- half speed with the keyboard
-   if key == w then
+   if key == "w" then
       car.coeff = 0.5
-   elseif key == s then
+   elseif key == "s" then
       car.coeff = -0.5
-   elseif key == up then
+   elseif key == "up" then
       car.coeff_x = 0.5
-   elseif key == down then
+   elseif key == "down" then
       car.coeff_x = -0.5
-   elseif key == left then
+   elseif key == "left" then
       car.coeff_z = 0.5
-   elseif key == right then
+   elseif key == "right" then
       car.coeff_z = -0.5
    end
 end
 
 function love.keyreleased(key)
-   if key == w then
+   if key == "w" then
       car.coeff = 0
-   elseif key == s then
+   elseif key == "s" then
       car.coeff = 0
-   elseif key == up then
+   elseif key == "up" then
       car.coeff_x = 0
-   elseif key == down then
+   elseif key == "down" then
       car.coeff_x = 0
-   elseif key == left then
+   elseif key == "left" then
       car.coeff_z = 0
-   elseif key == right then
+   elseif key == "right" then
       car.coeff_z = 0
+   end
+end
+
+function love.gamepadreleased(joystick, button)
+   if button == "a" then
+      -- look backward
+      car.dir_sign = 1
+   end
+end
+
+function love.gamepadpressed(joystick, button)
+   if button == "a" then
+      car.dir_sign = -1
    end
 end

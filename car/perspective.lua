@@ -7,13 +7,17 @@ local function T(self, point)
    return ret
 end
 
-local function R(self, point)
-   local ret = {x = self.c1 * point.x - self.s1 * point.y, y = self.s1 * point.x + self.c1 * point.y, z = point.z}
+local function R(self, point, inv)
+   inv = inv or 1
+   local s1 = inv * self.s1
+   local ret = {x = self.c1 * point.x - s1 * point.y, y = s1 * point.x + self.c1 * point.y, z = point.z}
    return ret
 end
 
-local function S(self, point)
-   local ret = {x = point.x, y = self.c2 * point.y + self.s2 * point.z, z = -self.s2 * point.y + self.c2 * point.z}
+local function S(self, point, inv)
+   inv = inv or 1
+   local s2 = inv * self.s2
+   local ret = {x = point.x, y = self.c2 * point.y + s2 * point.z, z = -s2 * point.y + self.c2 * point.z}
    return ret
 end
 
@@ -24,20 +28,32 @@ local function SRT(self, point)
    return s
 end
 
-local function camera(self, eye, centre)
+local function rotation(self, point, inv)
+   if not inv then
+      local r = self:R(point)
+      local s = self:S(r)
+      return s
+   else
+      local s = self:S(point, inv)
+      local r = self:R(s, inv)
+      return r
+   end
+end
+
+local function camera(self, eye, direction, sign)
    self.eye = eye
 
-   local dp = self:T(centre)
+   local dp = direction
    local r1 = vector.norm(dp.x, dp.y, 0)
    local r2 = vector.norm(dp.x, dp.y, dp.z)
 
-   self.s1 = dp.x / r1
-   self.c1 = dp.y / r1
+   self.s1 = dp.x / r1 * sign
+   self.c1 = dp.y / r1 * sign
 
    local rdp = self:R(dp)
 
-   self.c2 = rdp.y / r2
-   self.s2 = rdp.z / r2
+   self.c2 = rdp.y / r2 * sign
+   self.s2 = rdp.z / r2 * sign
 end
 
 local function projection(self, point)
@@ -81,6 +97,7 @@ local function new()
    p.R = R
    p.S = S
    p.SRT = SRT
+   p.rotation = rotation
    p.camera = camera
    p.projection = projection
    p.line = line
