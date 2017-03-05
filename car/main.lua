@@ -4,6 +4,7 @@ local canvas = require("canvas")
 local position = require("position")
 local vector = require("vector")
 local clock = require("clock")
+local colors = require("colors")
 
 require("../strict")
 
@@ -40,7 +41,7 @@ end
 local car = init()
 
 local function infinity(cnv3d, p1, p2)
-   love.graphics.setColor(0, 0, 255)
+   love.graphics.setColor(colors.gray)
 
    local inf = 100
 
@@ -56,9 +57,14 @@ local function infinity(cnv3d, p1, p2)
    local right_most_ahead = {x = inf, y = inf, z = 0}
    local left_most_behind = {x = -inf, y = -inf, z = 0}
    local right_most_behind = {x = inf, y = -inf, z = 0}
+
+   love.graphics.setColor(colors.magenta)
    cnv3d:line(left_most_ahead, right_most_ahead)
+   love.graphics.setColor(colors.maroon)
    cnv3d:line(right_most_ahead, right_most_behind)
+   love.graphics.setColor(colors.purple)
    cnv3d:line(right_most_behind, left_most_behind)
+   love.graphics.setColor(colors.teal)
    cnv3d:line(left_most_behind, left_most_ahead)
 end
 
@@ -66,7 +72,7 @@ local function c(car)
    local centre = vector.axpy(car.dir_sign, car.direction, car.eye.pos)
    local p = car.P:projection(centre)
    local ax, ay = car.cnv3d:convert(p)
-   love.graphics.setColor(255, 0, 0)
+   love.graphics.setColor(colors.red)
    local mode = (car.dir_sign > 0) and "fill" or "line"
    love.graphics.circle(mode, ax, ay, 5)
 end
@@ -82,10 +88,10 @@ local function fps(car, dt)
 end
 
 function love.draw()
-   love.graphics.setColor(255, 255, 0)
+   love.graphics.setColor(colors.yellow)
    car.c1:draw(car.cnv3d)
 
-   love.graphics.setColor(128, 255, 10)
+   love.graphics.setColor(colors.silver)
    car.c2:draw(car.cnv3d)
 
    c(car)
@@ -94,7 +100,7 @@ function love.draw()
 
    car.clock:draw(car.cnv3d)
 
-   love.graphics.setColor(255, 255, 255)
+   love.graphics.setColor(colors.white)
 
    love.graphics.print("Position: " .. vector.toString(car.eye.pos), 400, 520)
    love.graphics.print("Direction: " .. vector.toString(car.direction), 400, 535)

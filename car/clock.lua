@@ -1,3 +1,5 @@
+local colors = require("colors")
+
 local M = {}
 
 local function draw_line(self, canvas, angle, ratio)
@@ -15,14 +17,18 @@ local function draw(self, canvas)
    local a = os.date("*t")
 
    local angle_seconds = a.sec / 60
+   love.graphics.setColor(colors.lime)
    self:draw_line(canvas, angle_seconds, 0.9)
 
    local angle_minutes = (a.min + angle_seconds) / 60
+   love.graphics.setColor(colors.blue)
    self:draw_line(canvas, angle_minutes, 0.8)
 
    local angle_hours = ((a.hour + 12) + angle_minutes) / 12
+   love.graphics.setColor(colors.red)
    self:draw_line(canvas, angle_hours, 0.5)
 
+   love.graphics.setColor(colors.olive)
    for i = 1, self.steps do
       canvas:line(self.border[i], self.border[i + 1])
    end
