@@ -59,6 +59,17 @@ local function c(car)
    love.graphics.circle("fill", ax, ay, 5)
 end
 
+local function fps(car, dt)
+   local current = 1 / dt
+   if not car.fps then
+      print(dt)
+      car.fps = current
+   end
+
+   local alpha = math.exp(-dt)
+   car.fps = car.fps * alpha + current * (1 - alpha)
+end
+
 function love.draw()
    love.graphics.setColor(255, 255, 0)
    car.c1:draw(car.cnv3d)
@@ -73,18 +84,19 @@ function love.draw()
    love.graphics.setColor(255, 255, 255)
    love.graphics.print("Position: " .. vector.toString(car.eye.pos, 0.01), 400, 520)
    love.graphics.print("Direction: " .. vector.toString(car.direction, 0.01), 400, 540)
-   love.graphics.print("FPS: " .. math.floor(1 / car.dt), 400, 560)
+   love.graphics.print("FPS: " .. math.floor(car.fps), 400, 560)
 end
 
 function love.update(dt)
    local deg = dt * math.pi / 4
-   car.dt = dt
    car.direction = vector.rotate(car.direction, deg * car.coeff_x, deg * car.coeff_y, deg * car.coeff_z)
 
    car.eye:update(dt, car.direction, car.coeff * car.speed)
 
    car.centre = vector.add(car.eye.pos, car.direction)
    car.P:camera(car.eye.pos, car.centre)
+
+   fps(car, dt)
 end
 
 local leftx = "leftx"
