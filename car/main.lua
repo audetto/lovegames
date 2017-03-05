@@ -3,8 +3,9 @@ local cube = require("cube")
 local canvas = require("canvas")
 local position = require("position")
 local vector = require("vector")
+local clock = require("clock")
 
--- require("../strict")
+require("../strict")
 
 local function init()
    local car = {}
@@ -23,6 +24,10 @@ local function init()
 
    car.c1 = cube.new(car.p1, car.p2)
    car.c2 = cube.new({x = 10, y = 12, z = 0}, {x = 12, y = 0, z = -4})
+
+   local pos_clock = {x = 0, y = 50, z = 30}
+
+   car.clock = clock.new(pos_clock, 20)
 
    car.coeff = 0
    car.coeff_x = 0
@@ -86,6 +91,8 @@ function love.draw()
    c(car)
 
    infinity(car.cnv3d, car.p1, car.p2)
+
+   car.clock:draw(car.cnv3d)
 
    love.graphics.setColor(255, 255, 255)
 
