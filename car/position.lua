@@ -1,4 +1,5 @@
 local vector = require("vector")
+local torch = require("torch")
 
 local M = {}
 
@@ -9,7 +10,7 @@ end
 local mt = { __tostring = toString }
 
 local function update(self, dt, direction, coeff)
-   self.pos = vector.axpy(dt * coeff, direction, self.pos)
+   self.pos = torch.add(self.pos, dt * coeff, direction)
 end
 
 local function new(point)

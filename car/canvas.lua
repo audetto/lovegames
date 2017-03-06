@@ -1,10 +1,8 @@
-local vector = require("vector")
-
 local M = {}
 
 local function convert(self, point)
-   local x = self.width / 2 + point.x * self.scale
-   local y = self.height / 2 - point.z * self.scale
+   local x = self.width / 2 + point[1] * self.scale
+   local y = self.height / 2 - point[2] * self.scale
    return x, y
 end
 

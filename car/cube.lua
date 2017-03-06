@@ -21,15 +21,15 @@ local function new(p1, p2)
    local c = {}
    c.draw = draw
 
-   c.a1 = {x = p1.x, y = p1.y, z = p1.z}
-   c.a2 = {x = p2.x, y = p1.y, z = p1.z}
-   c.a3 = {x = p2.x, y = p2.y, z = p1.z}
-   c.a4 = {x = p1.x, y = p2.y, z = p1.z}
+   c.a1 = torch.Tensor({p1[1], p1[2], p1[3]})
+   c.a2 = torch.Tensor({p2[1], p1[2], p1[3]})
+   c.a3 = torch.Tensor({p2[1], p2[2], p1[3]})
+   c.a4 = torch.Tensor({p1[1], p2[2], p1[3]})
 
-   c.a5 = {x = p1.x, y = p1.y, z = p2.z}
-   c.a6 = {x = p2.x, y = p1.y, z = p2.z}
-   c.a7 = {x = p2.x, y = p2.y, z = p2.z}
-   c.a8 = {x = p1.x, y = p2.y, z = p2.z}
+   c.a5 = torch.Tensor({p1[1], p1[2], p2[3]})
+   c.a6 = torch.Tensor({p2[1], p1[2], p2[3]})
+   c.a7 = torch.Tensor({p2[1], p2[2], p2[3]})
+   c.a8 = torch.Tensor({p1[1], p2[2], p2[3]})
 
    return c
 end

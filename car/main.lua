@@ -5,8 +5,9 @@ local position = require("position")
 local vector = require("vector")
 local clock = require("clock")
 local colors = require("colors")
+local torch = require("torch")
 
-require("../strict")
+require("strict")
 
 local function viewfinder()
    local points = {}
@@ -14,12 +15,12 @@ local function viewfinder()
    local size = 0.5
    local dist = 10
 
-   local a1 = {x = -size, y = dist, z = 0}
-   local b1 = {x = size, y = dist, z = 0}
+   local a1 = torch.Tensor({-size, dist, 0})
+   local b1 = torch.Tensor({size, dist, 0})
    table.insert(points, {a = a1, b = b1, relative = true})
 
-   local a2 = {x = 0, y = dist, z = size}
-   local b2 = {x = 0, y = dist, z = -size}
+   local a2 = torch.Tensor({0, dist, size})
+local b2 = torch.Tensor({0, dist, -size})
    table.insert(points, {a = a2, b = b2, relative = true})
 
    return points
@@ -32,18 +33,18 @@ local function boundaries(p1, p2)
 
    local inf = 100
 
-   local a4_inf = {x = p1.x, y = inf, z = p1.z}
-   local a4 = {x = p1.x, y = p2.y, z = p1.z}
+   local a4_inf = torch.Tensor({p1[1], inf, p1[3]})
+   local a4 = torch.Tensor({p1[1], p2[2], p1[3]})
    table.insert(points, {a = a4, b = a4_inf, color = colors.gray})
 
-   local a3_inf = {x = p2.x, y = inf, z = p1.z}
-   local a3 = {x = p2.x, y = p2.y, z = p1.z}
+   local a3_inf = torch.Tensor({p2[1], inf, p1[3]})
+   local a3 = torch.Tensor({p2[1], p2[2], p1[3]})
    table.insert(points, {a = a3, b = a3_inf, color = colors.gray})
 
-   local left_most_ahead = {x = -inf, y = inf, z = 0}
-   local right_most_ahead = {x = inf, y = inf, z = 0}
-   local left_most_behind = {x = -inf, y = -inf, z = 0}
-   local right_most_behind = {x = inf, y = -inf, z = 0}
+   local left_most_ahead = torch.Tensor({-inf, inf, 0})
+   local right_most_ahead = torch.Tensor({inf, inf, 0})
+   local left_most_behind = torch.Tensor({-inf, -inf, 0})
+   local right_most_behind = torch.Tensor({inf, -inf, 0})
 
    table.insert(points, {a = left_most_ahead, b = right_most_ahead, color = colors.magenta})
    table.insert(points, {a = right_most_ahead, b = right_most_behind, color = colors.maroon})
@@ -57,26 +58,26 @@ local function init()
    local car = {}
 
    car.P = perspective.new()
-   car.direction = {x = 0, y = 1, z = 0}
+   car.direction = torch.Tensor({0, 1, 0})
    car.dir_sign = 1
    car.speed = 5
-   car.north = {x = 0, y = 0, z = 1}
+   car.north = torch.Tensor({0, 0, 1})
 
-   car.eye = position.new({x = 11, y = -15, z = 2})
+   car.eye = position.new(torch.Tensor({11, -15, 2}))
    car.P:camera(car.eye.pos, car.direction, car.dir_sign)
 
    car.cnv3d = canvas.new(car.P, 500)
 
-   local p1 = {x = 0, y = 0, z = 0}
-   local p2 =  {x = 7, y = 9, z = 3}
+   local p1 = torch.Tensor({0, 0, 0})
+   local p2 =  torch.Tensor({7, 9, 3})
 
    car.c1 = cube.new(p1, p2)
-   car.c2 = cube.new({x = 10, y = 12, z = 0}, {x = 12, y = 0, z = -4})
+   car.c2 = cube.new(torch.Tensor({10, 12, 0}), torch.Tensor({12, 0, -4}))
 
    car.viewfinder = viewfinder()
    car.boundaries = boundaries(p1, p2)
 
-   local pos_clock = {x = 0, y = 50, z = 30}
+   local pos_clock = torch.Tensor({0, 50, 30})
 
    car.clock = clock.new(pos_clock, 20)
 
