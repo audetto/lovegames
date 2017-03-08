@@ -8,7 +8,8 @@ local colors = require("colors")
 local torch = require("torch")
 local rotation = require("rotation")
 
-require("strict")
+-- missing strict is not an error
+pcall(function() require("strict") end)
 
 local function viewfinder()
    local points = {}
