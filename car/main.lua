@@ -6,6 +6,7 @@ local vector = require("vector")
 local clock = require("clock")
 local colors = require("colors")
 local torch = require("torch")
+local rotation = require("rotation")
 
 require("strict")
 
@@ -20,7 +21,7 @@ local function viewfinder()
    table.insert(points, {a = a1, b = b1, relative = true})
 
    local a2 = torch.Tensor({0, dist, size})
-local b2 = torch.Tensor({0, dist, -size})
+   local b2 = torch.Tensor({0, dist, -size})
    table.insert(points, {a = a2, b = b2, relative = true})
 
    return points
@@ -58,13 +59,13 @@ local function init()
    local car = {}
 
    car.P = perspective.new()
-   car.direction = torch.Tensor({0, 1, 0})
+   car.axes = rotation.new()
    car.dir_sign = 1
    car.speed = 5
    car.north = torch.Tensor({0, 0, 1})
 
    car.eye = position.new(torch.Tensor({11, -15, 2}))
-   car.P:camera(car.eye.pos, car.direction, car.dir_sign)
+   car.P:camera(car.eye.pos, car.axes:get(2), car.dir_sign)
 
    car.cnv3d = canvas.new(car.P, 500)
 
@@ -113,22 +114,22 @@ function love.draw()
    love.graphics.setColor(colors.white)
 
    love.graphics.print("Position: " .. vector.toString(car.eye.pos), 400, 500)
-   love.graphics.print("Direction: " .. vector.toString(car.direction), 400, 515)
-   local angle = vector.angle(car.direction, car.north) / (math.pi * 2) * 360
-   love.graphics.print(string.format("North: %6.1f", angle), 400, 530)
-   love.graphics.print("FPS: " .. love.timer.getFPS(), 400, 545)
+   love.graphics.print("Direction: " .. vector.toString(car.axes:get(2)), 400, 515)
+   love.graphics.print("Norm: " .. car.axes:get(2):norm(), 400, 530)
+   local angle = vector.angle(car.axes:get(2), car.north) / (math.pi * 2) * 360
+   love.graphics.print(string.format("North: %6.1f", angle), 400, 545)
+   love.graphics.print("FPS: " .. love.timer.getFPS(), 400, 560)
 end
 
 function love.update(dt)
    local deg = dt * math.pi / 4
-   -- needs to be simplified!
-   local relative = car.P:rotation(car.direction)
-   relative = vector.rotate(relative, deg * car.coeff_x, deg * car.coeff_y, deg * car.coeff_z)
-   car.direction = car.P:rotation(relative, -1)
 
-   car.eye:update(dt, car.direction, car.coeff * car.speed)
+   car.axes:rotate(rotation.x, deg * car.coeff_x)
+   car.axes:rotate(rotation.z, -deg * car.coeff_z)
 
-   car.P:camera(car.eye.pos, car.direction, car.dir_sign)
+   car.eye:update(dt, car.axes:get(2), car.coeff * car.speed)
+
+   car.P:camera(car.eye.pos, car.axes:get(2), car.dir_sign)
 end
 
 function love.gamepadaxis(joystick, axis, value)
