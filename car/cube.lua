@@ -1,20 +1,23 @@
 local M = {}
 
+local function addLine(lines, a, b)
+   table.insert(lines, {a, b})
+end
+
+local function addFace(faces, ...)
+   table.insert(faces, {...})
+end
+
 local function draw(self, canvas3d)
-   canvas3d:line(self.a1, self.a2)
-   canvas3d:line(self.a2, self.a3)
-   canvas3d:line(self.a3, self.a4)
-   canvas3d:line(self.a4, self.a1)
+   for _, points in ipairs(self.lines) do
+      canvas3d:line(points[1], points[2])
+   end
+end
 
-   canvas3d:line(self.a5, self.a6)
-   canvas3d:line(self.a6, self.a7)
-   canvas3d:line(self.a7, self.a8)
-   canvas3d:line(self.a8, self.a5)
-
-   canvas3d:line(self.a1, self.a5)
-   canvas3d:line(self.a2, self.a6)
-   canvas3d:line(self.a3, self.a7)
-   canvas3d:line(self.a4, self.a8)
+local function drawj(self, canvas3d)
+   for _, points in ipairs(self.faces) do
+      canvas3d:polygon("fill", points)
+   end
 end
 
 local function new(p1, p2)
@@ -30,6 +33,31 @@ local function new(p1, p2)
    c.a6 = torch.Tensor({p2[1], p1[2], p2[3]})
    c.a7 = torch.Tensor({p2[1], p2[2], p2[3]})
    c.a8 = torch.Tensor({p1[1], p2[2], p2[3]})
+
+   c.lines = {}
+   c.faces = {}
+
+   addLine(c.lines, c.a1, c.a2)
+   addLine(c.lines, c.a2, c.a3)
+   addLine(c.lines, c.a3, c.a4)
+   addLine(c.lines, c.a4, c.a1)
+
+   addLine(c.lines, c.a5, c.a6)
+   addLine(c.lines, c.a6, c.a7)
+   addLine(c.lines, c.a7, c.a8)
+   addLine(c.lines, c.a8, c.a5)
+
+   addLine(c.lines, c.a1, c.a5)
+   addLine(c.lines, c.a2, c.a6)
+   addLine(c.lines, c.a3, c.a7)
+   addLine(c.lines, c.a4, c.a8)
+
+   addFace(c.faces, c.a1, c.a4, c.a3, c.a2)
+   addFace(c.faces, c.a6, c.a5, c.a1, c.a2)
+   addFace(c.faces, c.a7, c.a6, c.a2, c.a3)
+   addFace(c.faces, c.a8, c.a7, c.a3, c.a4)
+   addFace(c.faces, c.a5, c.a8, c.a4, c.a1)
+   addFace(c.faces, c.a7, c.a8, c.a5, c.a6)
 
    return c
 end

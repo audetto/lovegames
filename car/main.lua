@@ -74,6 +74,7 @@ local function init()
 
    car.c1 = cube.new(p1, p2)
    car.c2 = cube.new(torch.Tensor({10, 12, 0}), torch.Tensor({12, 0, -4}))
+   car.c3 = cube.new(torch.Tensor({5, 12, 10}), torch.Tensor({12, 20, 14}))
 
    car.viewfinder = viewfinder()
    car.boundaries = boundaries(p1, p2)
@@ -98,6 +99,7 @@ function love.draw()
 
    love.graphics.setColor(colors.silver)
    car.c2:draw(car.cnv3d)
+   car.c3:draw(car.cnv3d)
 
    car.cnv3d:lines(car.boundaries)
 

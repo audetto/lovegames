@@ -41,11 +41,12 @@ local function line(self, a, b, relative)
       local weight_a = (self.eps - rb[2]) / (ra[2] - rb[2])
 
       local new_x = ra[1] * weight_a  + rb[1] * (1 - weight_a)
+      local new_y = self.eps
       local new_z = ra[3] * weight_a  + rb[3] * (1 - weight_a)
 
       -- this is basically an other projection
-      pb[1] = new_x / self.eps
-      pb[2] = new_z / self.eps
+      pb[1] = new_x / new_y
+      pb[2] = new_z / new_y
    end
 
    return pa, pb
