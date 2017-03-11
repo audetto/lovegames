@@ -66,7 +66,6 @@ local function init()
    car.north = torch.Tensor({0, 0, 1})
 
    car.eye = position.new(torch.Tensor({11, -15, 2}))
-   car.P:camera(car.eye.pos, car.axes:get(2), car.dir_sign)
 
    car.cnv3d = canvas.new(car.P, 500)
 
@@ -130,7 +129,7 @@ function love.update(dt)
 
    car.eye:update(dt, car.axes:get(2), car.coeff * car.speed)
 
-   car.P:camera(car.eye.pos, car.axes:get(2), car.dir_sign)
+   car.P:camera(car.eye.pos, car.axes, car.dir_sign)
 end
 
 function love.gamepadaxis(joystick, axis, value)

@@ -4,7 +4,7 @@ local torch = require("torch")
 local M = {}
 
 local function toString(position)
-   return "position: " .. vector.toString(position.pos)
+   return "position: " .. vector.toString(position.axes)
 end
 
 local mt = { __tostring = toString }

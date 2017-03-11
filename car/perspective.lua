@@ -1,60 +1,11 @@
-local vector = require("vector")
 local torch = require("torch")
 
 local M = {}
 
-local function T(self, point)
-   local ret = torch.add(point, -1, self.eye)
-   return ret
-end
-
-local function R(self, point, inv)
-   inv = inv or 1
-   local s1 = inv * self.s1
-   local ret = torch.Tensor({self.c1 * point[1] - s1 * point[2], s1 * point[1] + self.c1 * point[2], point[3]})
-   return ret
-end
-
-local function S(self, point, inv)
-   inv = inv or 1
-   local s2 = inv * self.s2
-   local ret = torch.Tensor({point[1], self.c2 * point[2] + s2 * point[3], -s2 * point[2] + self.c2 * point[3]})
-   return ret
-end
-
-local function SRT(self, point)
-   local t = self:T(point)
-   local r = self:R(t)
-   local s = self:S(r)
-   return s
-end
-
-local function rotation(self, point, inv)
-   if not inv then
-      local r = self:R(point)
-      local s = self:S(r)
-      return s
-   else
-      local s = self:S(point, inv)
-      local r = self:R(s, inv)
-      return r
-   end
-end
-
 local function camera(self, eye, direction, sign)
    self.eye = eye
-
-   local dp = direction
-   local r1 = vector.norm(dp[1], dp[2], 0)
-   local r2 = torch.norm(dp)
-
-   self.s1 = dp[1] / r1 * sign
-   self.c1 = dp[2] / r1 * sign
-
-   local rdp = self:R(dp)
-
-   self.c2 = rdp[2] / r2 * sign
-   self.s2 = rdp[3] / r2 * sign
+   self.rotation = direction.axes
+   self.sign = sign
 end
 
 local function projection(self, point, relative)
@@ -65,7 +16,10 @@ local function projection(self, point, relative)
       -- while it is always relative ahead now
       srt = point
    else
-      srt = self:SRT(point)
+      srt = point - self.eye
+      srt = self.rotation * srt
+      srt[1] = srt[1] * self.sign
+      srt[2] = srt[2] * self.sign
    end
    local ret = torch.Tensor({srt[1] / srt[2], srt[3] / srt[2]})
    return ret, srt
@@ -102,11 +56,6 @@ local function new()
 
    p.eps = 0.01
 
-   p.T = T
-   p.R = R
-   p.S = S
-   p.SRT = SRT
-   p.rotation = rotation
    p.camera = camera
    p.projection = projection
    p.line = line
