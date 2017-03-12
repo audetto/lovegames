@@ -1,4 +1,5 @@
-local torch = require("torch")
+local vector = require("vector")
+local matrix = require("matrix")
 
 local M = {}
 
@@ -8,7 +9,7 @@ local function camera(self, eye, direction, sign)
    self.sign = sign
 end
 
-local function projection(self, point, relative)
+local function projection(self, res, point, relative)
    local srt
    if relative then
       -- it would be nice to remove the sign
@@ -16,18 +17,18 @@ local function projection(self, point, relative)
       -- while it is always relative ahead now
       srt = point
    else
-      srt = point - self.eye
-      srt = self.rotation * srt
+      srt = vector.add(self.work1, point, -1, self.eye)
+      srt = matrix.mulmv(res, self.rotation, srt)
       srt[1] = srt[1] * self.sign
       srt[2] = srt[2] * self.sign
    end
-   local ret = torch.Tensor({srt[1] / srt[2], srt[3] / srt[2]})
+   local ret = {srt[1] / srt[2], srt[3] / srt[2]}
    return ret, srt
 end
 
 local function line(self, a, b, relative)
-   local pa, ra = self:projection(a, relative)
-   local pb, rb = self:projection(b, relative)
+   local pa, ra = self:projection(self.work2, a, relative)
+   local pb, rb = self:projection(self.work3, b, relative)
 
    if ra[2] <= self.eps and rb[2] <= self.eps then
       return
@@ -54,6 +55,10 @@ end
 
 local function new()
    local p = {}
+
+   p.work1 = vector.empty()
+   p.work2 = vector.empty()
+   p.work3 = vector.empty()
 
    p.eps = 0.01
 

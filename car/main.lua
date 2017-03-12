@@ -5,7 +5,6 @@ local position = require("position")
 local vector = require("vector")
 local clock = require("clock")
 local colors = require("colors")
-local torch = require("torch")
 local rotation = require("rotation")
 
 -- missing strict is not an error
@@ -17,12 +16,12 @@ local function viewfinder()
    local size = 0.5
    local dist = 10
 
-   local a1 = torch.Tensor({-size, dist, 0})
-   local b1 = torch.Tensor({size, dist, 0})
+   local a1 = vector.new({-size, dist, 0})
+   local b1 = vector.new({size, dist, 0})
    table.insert(points, {a = a1, b = b1, relative = true})
 
-   local a2 = torch.Tensor({0, dist, size})
-   local b2 = torch.Tensor({0, dist, -size})
+   local a2 = vector.new({0, dist, size})
+   local b2 = vector.new({0, dist, -size})
    table.insert(points, {a = a2, b = b2, relative = true})
 
    return points
@@ -35,18 +34,18 @@ local function boundaries(p1, p2)
 
    local inf = 100
 
-   local a4_inf = torch.Tensor({p1[1], inf, p1[3]})
-   local a4 = torch.Tensor({p1[1], p2[2], p1[3]})
+   local a4_inf = vector.new({p1[1], inf, p1[3]})
+   local a4 = vector.new({p1[1], p2[2], p1[3]})
    table.insert(points, {a = a4, b = a4_inf, color = colors.gray})
 
-   local a3_inf = torch.Tensor({p2[1], inf, p1[3]})
-   local a3 = torch.Tensor({p2[1], p2[2], p1[3]})
+   local a3_inf = vector.new({p2[1], inf, p1[3]})
+   local a3 = vector.new({p2[1], p2[2], p1[3]})
    table.insert(points, {a = a3, b = a3_inf, color = colors.gray})
 
-   local left_most_ahead = torch.Tensor({-inf, inf, 0})
-   local right_most_ahead = torch.Tensor({inf, inf, 0})
-   local left_most_behind = torch.Tensor({-inf, -inf, 0})
-   local right_most_behind = torch.Tensor({inf, -inf, 0})
+   local left_most_ahead = vector.new({-inf, inf, 0})
+   local right_most_ahead = vector.new({inf, inf, 0})
+   local left_most_behind = vector.new({-inf, -inf, 0})
+   local right_most_behind = vector.new({inf, -inf, 0})
 
    table.insert(points, {a = left_most_ahead, b = right_most_ahead, color = colors.magenta})
    table.insert(points, {a = right_most_ahead, b = right_most_behind, color = colors.maroon})
@@ -63,23 +62,23 @@ local function init()
    car.axes = rotation.new()
    car.dir_sign = 1
    car.speed = 5
-   car.north = torch.Tensor({0, 0, 1})
+   car.north = vector.new({0, 0, 1})
 
-   car.eye = position.new(torch.Tensor({11, -15, 2}))
+   car.eye = position.new(vector.new({11, -15, 2}))
 
    car.cnv3d = canvas.new(car.P, 500)
 
-   local p1 = torch.Tensor({0, 0, 0})
-   local p2 =  torch.Tensor({7, 9, 3})
+   local p1 = vector.new({0, 0, 0})
+   local p2 = vector.new({7, 9, 3})
 
    car.c1 = cube.new(p1, p2)
-   car.c2 = cube.new(torch.Tensor({10, 12, 0}), torch.Tensor({12, 0, -4}))
-   car.c3 = cube.new(torch.Tensor({5, 12, 10}), torch.Tensor({12, 20, 14}))
+   car.c2 = cube.new(vector.new({10, 12, 0}), vector.new({12, 0, -4}))
+   car.c3 = cube.new(vector.new({5, 12, 10}), vector.new({12, 20, 14}))
 
    car.viewfinder = viewfinder()
    car.boundaries = boundaries(p1, p2)
 
-   local pos_clock = torch.Tensor({0, 50, 30})
+   local pos_clock = vector.new({0, 50, 30})
 
    car.clock = clock.new(pos_clock, 20)
 
@@ -115,10 +114,12 @@ function love.draw()
 
    love.graphics.setColor(colors.white)
 
-   love.graphics.print("Position: " .. vector.toString(car.eye.pos), 400, 500)
-   love.graphics.print("Direction: " .. vector.toString(car.axes:get(2)), 400, 515)
-   love.graphics.print("Norm: " .. car.axes:get(2):norm(), 400, 530)
-   local angle = vector.angle(car.axes:get(2), car.north) / (math.pi * 2) * 360
+   local direction = car.axes:get(2)
+
+   love.graphics.print("Position: " .. tostring(car.eye.pos), 400, 500)
+   love.graphics.print("Direction: " .. tostring(direction), 400, 515)
+   love.graphics.print("Norm: " .. direction:norm(), 400, 530)
+   local angle = direction:angle(car.north) / (math.pi * 2) * 360
    love.graphics.print(string.format("North: %6.1f", angle), 400, 545)
    love.graphics.print("FPS: " .. love.timer.getFPS(), 400, 560)
 end

@@ -1,3 +1,4 @@
+local vector = require("vector")
 local M = {}
 
 local function addLine(lines, a, b)
@@ -24,15 +25,15 @@ local function new(p1, p2)
    local c = {}
    c.draw = draw
 
-   c.a1 = torch.Tensor({p1[1], p1[2], p1[3]})
-   c.a2 = torch.Tensor({p2[1], p1[2], p1[3]})
-   c.a3 = torch.Tensor({p2[1], p2[2], p1[3]})
-   c.a4 = torch.Tensor({p1[1], p2[2], p1[3]})
+   c.a1 = vector.new({p1[1], p1[2], p1[3]})
+   c.a2 = vector.new({p2[1], p1[2], p1[3]})
+   c.a3 = vector.new({p2[1], p2[2], p1[3]})
+   c.a4 = vector.new({p1[1], p2[2], p1[3]})
 
-   c.a5 = torch.Tensor({p1[1], p1[2], p2[3]})
-   c.a6 = torch.Tensor({p2[1], p1[2], p2[3]})
-   c.a7 = torch.Tensor({p2[1], p2[2], p2[3]})
-   c.a8 = torch.Tensor({p1[1], p2[2], p2[3]})
+   c.a5 = vector.new({p1[1], p1[2], p2[3]})
+   c.a6 = vector.new({p2[1], p1[2], p2[3]})
+   c.a7 = vector.new({p2[1], p2[2], p2[3]})
+   c.a8 = vector.new({p1[1], p2[2], p2[3]})
 
    c.lines = {}
    c.faces = {}

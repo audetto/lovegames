@@ -1,5 +1,5 @@
 local colors = require("colors")
-local torch = require("torch")
+local vector = require("vector")
 
 local M = {}
 
@@ -10,7 +10,7 @@ local function draw_line(self, canvas, angle, ratio)
 
    local a = self.position
 
-   local b = torch.Tensor({a[1] + x, a[2], a[3] + z})
+   local b = vector.new({a[1] + x, a[2], a[3] + z})
    canvas:line(a, b)
 end
 
@@ -52,7 +52,7 @@ function M.new(position, size)
       local x = math.cos(rad) * p.size
       local z = math.sin(rad) * p.size
 
-      local b = torch.Tensor({p.position[1] + x, p.position[2], p.position[3] + z})
+      local b = vector.new({p.position[1] + x, p.position[2], p.position[3] + z})
 
       table.insert(p.border, b)
    end
