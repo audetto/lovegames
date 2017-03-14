@@ -23,13 +23,26 @@ local function add(res, x, a, y)
    return res
 end
 
-local function angle(self, b)
+local function cosangle(self, b)
    local d = dot(self, b)
    local na = norm(self)
    local nb = norm(b)
 
    local ac = d / (na * nb)
+   return ac
+end
+
+local function angle(self, b)
+   local ac = cosangle(self, b)
    return math.acos(ac)
+end
+
+local function cross(a, b)
+   local res = {}
+   res[1] = a[2] * b[3] - a[3] * b[2]
+   res[2] = a[3] * b[1] - a[1] * b[3]
+   res[3] = a[1] * b[2] - a[2] * b[1]
+   return res
 end
 
 local mt = {__tostring = toString}
@@ -54,11 +67,13 @@ end
 
 M.toString = toString
 M.angle = angle
+M.cosangle = cosangle
 M.norm = norm
 M.add = add
 M.new = new
 M.empty = empty
 M.dot = dot
 M.clone = clone
+M.cross = cross
 
 return M

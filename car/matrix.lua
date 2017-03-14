@@ -52,9 +52,6 @@ local function empty()
 end
 
 M.toString = toString
-M.angle = angle
-M.norm = norm
-M.axpy = axpy
 M.new = new
 M.empty = empty
 M.mulmv = mulmv

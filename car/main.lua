@@ -71,9 +71,9 @@ local function init()
    local p1 = vector.new({0, 0, 0})
    local p2 = vector.new({7, 9, 3})
 
-   car.c1 = cube.new(p1, p2)
-   car.c2 = cube.new(vector.new({10, 12, 0}), vector.new({12, 0, -4}))
-   car.c3 = cube.new(vector.new({5, 12, 10}), vector.new({12, 20, 14}))
+   car.c1 = cube.new(colors.yellow, p1, p2)
+   car.c2 = cube.new(colors.silver, vector.new({10, 12, 0}), vector.new({12, 0, -4}))
+   car.c3 = cube.new(colors.silver, vector.new({5, 12, 10}), vector.new({12, 20, 14}))
 
    car.viewfinder = viewfinder()
    car.boundaries = boundaries(p1, p2)
@@ -93,10 +93,8 @@ end
 local car = init()
 
 function love.draw()
-   love.graphics.setColor(colors.yellow)
    car.c1:draw(car.cnv3d)
 
-   love.graphics.setColor(colors.silver)
    car.c2:draw(car.cnv3d)
    car.c3:draw(car.cnv3d)
 

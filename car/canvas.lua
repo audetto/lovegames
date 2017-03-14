@@ -1,3 +1,5 @@
+local vector = require("vector")
+
 local M = {}
 
 local function addPoint(self, points, p)
@@ -33,10 +35,26 @@ local function lines(self, points)
    end
 end
 
-local function polygon(self, mode, vertices)
+local function polygon(self, mode, face)
+   local vertices = face.vertices
    local points = {}
    local n = #vertices
    local prev = vertices[n]
+
+   local centroid = face.centroid
+   local normal = face.normal
+   local eye = self.perspective.eye
+
+   local connecting = vector.add(self.work, eye, -1, centroid)
+
+   local cos = vector.cosangle(connecting, normal)
+
+   if cos < self.cosThreshold then
+      -- we cannot see the face
+      return
+   end
+
+   love.graphics.setColor(face.color[1] * cos, face.color[2] * cos, face.color[3] * cos)
 
    for i = 1, n do
       local current = vertices[i]
@@ -64,6 +82,8 @@ end
 local function new(perspective, scale)
    local c = {}
 
+   c.cosThreshold = 0.01
+   c.work = vector.empty()
    c.perspective = perspective
    c.convert = convert
    c.line = line
