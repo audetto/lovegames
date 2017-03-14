@@ -74,6 +74,7 @@ local function init()
    car.c1 = cube.new(colors.yellow, p1, p2)
    car.c2 = cube.new(colors.silver, vector.new({10, 12, 0}), vector.new({12, 0, -4}))
    car.c3 = cube.new(colors.silver, vector.new({5, 12, 10}), vector.new({12, 20, 14}))
+   car.c4 = cube.new(colors.red, vector.new({10, 30, 0}), vector.new({12, 18, -4}))
 
    car.viewfinder = viewfinder()
    car.boundaries = boundaries(p1, p2)
@@ -94,13 +95,14 @@ local car = init()
 
 function love.draw()
    car.c1:draw(car.cnv3d)
-
    car.c2:draw(car.cnv3d)
    car.c3:draw(car.cnv3d)
+   car.c4:draw(car.cnv3d)
 
-   car.cnv3d:lines(car.boundaries)
+   car.cnv3d:draw()
 
    car.clock:draw(car.cnv3d)
+   car.cnv3d:lines(car.boundaries)
 
    if car.dir_sign > 0 then
       love.graphics.setColor(colors.red)
