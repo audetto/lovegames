@@ -26,31 +26,38 @@ local function projection(self, res, point, relative)
    return ret, srt
 end
 
+local function limitProjection(res, eps, ahead, behind)
+   local weight_a = (eps - behind[2]) / (ahead[2] - behind[2])
+
+   local new_x = ahead[1] * weight_a  + behind[1] * (1 - weight_a)
+   local new_y = eps
+   local new_z = ahead[3] * weight_a  + behind[3] * (1 - weight_a)
+
+   -- this is basically another projection
+   res[1] = new_x / new_y
+   res[2] = new_z / new_y
+end
+
 local function line(self, a, b, relative)
    local pa, ra = self:projection(self.work2, a, relative)
    local pb, rb = self:projection(self.work3, b, relative)
 
-   if ra[2] <= self.eps and rb[2] <= self.eps then
-      return
-   end
-
    if ra[2] <= self.eps then
-      pa, ra, pb, rb = pb, rb, pa, ra
+      if rb[2] <= self.eps then
+	 return
+      else
+	 limitProjection(pa, self.eps, rb, ra)
+	 return pa, pb, false, true
+      end
+   else
+      if rb[2] <= self.eps then
+	 limitProjection(pb, self.eps, ra, rb)
+	 return pa, pb, true, false
+      else
+	 return pa, pb, true, true
+      end
    end
 
-   if rb[2] <= self.eps then
-      local weight_a = (self.eps - rb[2]) / (ra[2] - rb[2])
-
-      local new_x = ra[1] * weight_a  + rb[1] * (1 - weight_a)
-      local new_y = self.eps
-      local new_z = ra[3] * weight_a  + rb[3] * (1 - weight_a)
-
-      -- this is basically an other projection
-      pb[1] = new_x / new_y
-      pb[2] = new_z / new_y
-   end
-
-   return pa, pb
 end
 
 local function new()

@@ -1,5 +1,12 @@
 local M = {}
 
+local function addPoint(self, points, p)
+   local x, y = self:convert(p)
+
+   table.insert(points, x)
+   table.insert(points, y)
+end
+
 local function convert(self, point)
    local x = self.width / 2 + point[1] * self.scale
    local y = self.height / 2 - point[2] * self.scale
@@ -33,17 +40,24 @@ local function polygon(self, mode, vertices)
 
    for i = 1, n do
       local current = vertices[i]
-      local pa, pb = self.perspective:line(prev, current)
-      if pa and pb then
-	 local bx, by = self:convert(pb)
+      local pa, pb, orga, _ = self.perspective:line(prev, current)
 
-	 table.insert(points, bx)
-	 table.insert(points, by)
+      if pa and pb then
+	 if not orga then
+	    -- the a point has been modified
+	    -- so it wont much the b point of the previous side
+	    -- => we must inster it now
+	    self:addPoint(points, pa)
+	 end
+
+	 -- b point is always inserted
+	 self:addPoint(points, pb)
       end
+      prev = current
    end
 
    if #points > 4 then
-      love.graphics.polygon(mode, table.unpack(points))
+      love.graphics.polygon(mode, points)
    end
 end
 
@@ -55,6 +69,7 @@ local function new(perspective, scale)
    c.line = line
    c.lines = lines
    c.polygon = polygon
+   c.addPoint = addPoint
 
    c.scale = scale
    c.width = love.graphics.getWidth()
