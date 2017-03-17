@@ -1,34 +1,35 @@
 local perspective = require("perspective")
-local cube = require("cube")
+local shapes = require("shapes")
 local canvas = require("canvas")
 local position = require("position")
 local vector = require("vector")
 local clock = require("clock")
 local colors = require("colors")
 local rotation = require("rotation")
+local solid = require("solid")
 
 -- missing strict is not an error
 pcall(function() require("strict") end)
 
 local function viewfinder()
-   local points = {}
+   local points = solid.new()
 
-   local size = 0.5
-   local dist = 10
+   local size = 0.05
+   local dist = 1
 
    local a1 = vector.new({-size, dist, 0})
    local b1 = vector.new({size, dist, 0})
-   table.insert(points, {a = a1, b = b1, relative = true})
+   points:addLine(colors.red, a1, b1, true)
 
    local a2 = vector.new({0, dist, size})
    local b2 = vector.new({0, dist, -size})
-   table.insert(points, {a = a2, b = b2, relative = true})
+   points:addLine(colors.red, a2, b2, true)
 
    return points
 end
 
 local function boundaries(p1, p2)
-   local points = {}
+   local points = solid.new()
 
    love.graphics.setColor(colors.gray)
 
@@ -36,21 +37,21 @@ local function boundaries(p1, p2)
 
    local a4_inf = vector.new({p1[1], inf, p1[3]})
    local a4 = vector.new({p1[1], p2[2], p1[3]})
-   table.insert(points, {a = a4, b = a4_inf, color = colors.gray})
+   points:addLine(colors.gray, a4, a4_inf)
 
    local a3_inf = vector.new({p2[1], inf, p1[3]})
    local a3 = vector.new({p2[1], p2[2], p1[3]})
-   table.insert(points, {a = a3, b = a3_inf, color = colors.gray})
+   points:addLine(colors.gray, a3, a3_inf)
 
    local left_most_ahead = vector.new({-inf, inf, 0})
    local right_most_ahead = vector.new({inf, inf, 0})
    local left_most_behind = vector.new({-inf, -inf, 0})
    local right_most_behind = vector.new({inf, -inf, 0})
 
-   table.insert(points, {a = left_most_ahead, b = right_most_ahead, color = colors.magenta})
-   table.insert(points, {a = right_most_ahead, b = right_most_behind, color = colors.maroon})
-   table.insert(points, {a = right_most_behind, b = left_most_behind, color = colors.purple})
-   table.insert(points, {a = left_most_behind, b = left_most_ahead, color = colors.teal})
+   points:addLine(colors.magenta, left_most_ahead, right_most_ahead)
+   points:addLine(colors.gray, right_most_ahead, right_most_behind)
+   points:addLine(colors.gray, right_most_behind, left_most_behind)
+   points:addLine(colors.gray, left_most_behind, left_most_ahead)
 
    return points
 end
@@ -71,10 +72,10 @@ local function init()
    local p1 = vector.new({0, 0, 0})
    local p2 = vector.new({7, 9, 3})
 
-   car.c1 = cube.new(colors.yellow, p1, p2)
-   car.c2 = cube.new(colors.silver, vector.new({10, 12, 0}), vector.new({12, 0, -4}))
-   car.c3 = cube.new(colors.silver, vector.new({5, 12, 10}), vector.new({12, 20, 14}))
-   car.c4 = cube.new(colors.red, vector.new({10, 30, 0}), vector.new({12, 18, -4}))
+   car.c1 = shapes.cube(colors.yellow, p1, p2)
+   car.c2 = shapes.cube(colors.silver, vector.new({10, 12, 0}), vector.new({12, 0, -4}))
+   car.c3 = shapes.cube(colors.silver, vector.new({5, 12, 10}), vector.new({12, 20, 14}))
+   car.c4 = shapes.cube(colors.red, vector.new({10, 30, 0}), vector.new({12, 18, -4}))
 
    car.viewfinder = viewfinder()
    car.boundaries = boundaries(p1, p2)
@@ -99,18 +100,11 @@ function love.draw()
    car.c3:draw(car.cnv3d)
    car.c4:draw(car.cnv3d)
 
-   car.cnv3d:draw()
-
    car.clock:draw(car.cnv3d)
-   car.cnv3d:lines(car.boundaries)
+   car.boundaries:draw(car.cnv3d)
+   car.viewfinder:draw(car.cnv3d)
 
-   if car.dir_sign > 0 then
-      love.graphics.setColor(colors.red)
-   else
-      love.graphics.setColor(colors.cyan)
-   end
-
-   car.cnv3d:lines(car.viewfinder)
+   car.cnv3d:draw()
 
    love.graphics.setColor(colors.white)
 

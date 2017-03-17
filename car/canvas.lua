@@ -15,23 +15,32 @@ local function convert(self, point)
    return x, y
 end
 
-local function line(self, a, b, relative)
-   local pa, pb = self.perspective:line(a, b, relative)
+local function line(self, theLine)
+   local vertices = theLine.vertices
+   local relative = theLine.relative
+   local pa, pb = self.perspective:line(vertices[1], vertices[2], relative)
 
    if pa and pb then
       local ax, ay = self:convert(pa)
       local bx, by = self:convert(pb)
 
-      love.graphics.line(ax, ay, bx, by)
+      local centroid = theLine.centroid
+      local eye = self.perspective.eye
+
+      local connecting = (relative and centroid) or vector.add(self.work, eye, -1, centroid)
+
+      local dist = connecting:norm()
+      table.insert(self.buffer, {dist = dist, action = function ()
+				    love.graphics.setColor(theLine.color)
+				    love.graphics.line(ax, ay, bx, by)
+						       end
+      })
    end
 end
 
-local function lines(self, points)
-   for _, value in ipairs(points) do
-      if value.color then
-	 love.graphics.setColor(value.color)
-      end
-      self:line(value.a, value.b, value.relative)
+local function lines(self, theLines)
+   for _, theLine in ipairs(theLines) do
+      self:line(theLine)
    end
 end
 

@@ -1,9 +1,10 @@
 local colors = require("colors")
 local vector = require("vector")
+local solid = require("solid")
 
 local M = {}
 
-local function draw_line(self, canvas, angle, ratio)
+local function createLine(self, color, angle, ratio)
    local rad = math.pi * (0.5 - 2 * angle)
    local x = math.cos(rad) * ratio * self.size
    local z = math.sin(rad) * ratio * self.size
@@ -11,41 +12,40 @@ local function draw_line(self, canvas, angle, ratio)
    local a = self.position
 
    local b = vector.new({a[1] + x, a[2], a[3] + z})
-   canvas:line(a, b)
+
+   local line = solid.newLine(color, a, b)
+   return line
 end
 
 local function draw(self, canvas)
+   canvas:lines(self.lines)
+
+   local lines = {}
+
    local a = os.date("*t")
 
    local angle_seconds = a.sec / 60
-   love.graphics.setColor(colors.lime)
-   self:draw_line(canvas, angle_seconds, 0.9)
+   table.insert(lines, self:createLine(colors.lime, angle_seconds, 0.9))
 
    local angle_minutes = (a.min + angle_seconds) / 60
-   love.graphics.setColor(colors.blue)
-   self:draw_line(canvas, angle_minutes, 0.8)
+   table.insert(lines, self:createLine(colors.blue, angle_minutes, 0.8))
 
    local angle_hours = ((a.hour + 12) + angle_minutes) / 12
-   love.graphics.setColor(colors.red)
-   self:draw_line(canvas, angle_hours, 0.5)
+   table.insert(lines, self:createLine(colors.red, angle_hours, 0.5))
 
-   love.graphics.setColor(colors.olive)
-   for i = 1, self.steps do
-      canvas:line(self.border[i], self.border[i + 1])
-   end
-
+   canvas:lines(lines)
 end
 
 function M.new(position, size)
    local p = {}
 
-   p.steps = 40
+   p.steps = 12
    p.position = position
    p.size = size
    p.draw = draw
-   p.draw_line = draw_line
+   p.createLine = createLine
 
-   p.border = {}
+   local border = {}
 
    for i = 1, p.steps do
       local rad = math.pi * 2 / p.steps * i
@@ -54,9 +54,16 @@ function M.new(position, size)
 
       local b = vector.new({p.position[1] + x, p.position[2], p.position[3] + z})
 
-      table.insert(p.border, b)
+      table.insert(border, b)
    end
-   table.insert(p.border, p.border[1])
+   table.insert(border, border[1])
+
+   p.lines = {}
+
+   for i = 1, p.steps do
+      local line = solid.newLine(colors.olive, border[i], border[i + 1])
+      table.insert(p.lines, line)
+   end
 
    return p
 end
