@@ -1,11 +1,10 @@
 local perspective = require("perspective")
 local shapes = require("shapes")
 local canvas = require("canvas")
-local position = require("position")
+local transformation = require("transformation")
 local vector = require("vector")
 local clock = require("clock")
 local colors = require("colors")
-local rotation = require("rotation")
 local solid = require("solid")
 
 -- missing strict is not an error
@@ -60,12 +59,11 @@ local function init()
    local car = {}
 
    car.P = perspective.new()
-   car.axes = rotation.new()
    car.dir_sign = 1
    car.speed = 5
    car.north = vector.new({0, 0, 1})
 
-   car.eye = position.new(vector.new({11, -15, 2}))
+   car.camera = transformation.new(vector.new({11, -15, 2}))
 
    car.cnv3d = canvas.new(car.P, 500)
 
@@ -108,9 +106,9 @@ function love.draw()
 
    love.graphics.setColor(colors.white)
 
-   local direction = car.axes:get(2)
+   local direction = car.camera:getY()
 
-   love.graphics.print("Position: " .. tostring(car.eye.pos), 400, 500)
+   love.graphics.print("Position: " .. tostring(car.camera.translation), 400, 500)
    love.graphics.print("Direction: " .. tostring(direction), 400, 515)
    love.graphics.print("Norm: " .. direction:norm(), 400, 530)
    local angle = direction:angle(car.north) / (math.pi * 2) * 360
@@ -121,12 +119,12 @@ end
 function love.update(dt)
    local deg = dt * math.pi / 4
 
-   car.axes:rotate(rotation.x, deg * car.coeff_x)
-   car.axes:rotate(rotation.z, -deg * car.coeff_z)
+   car.camera:rotate(transformation.x, deg * car.coeff_x)
+   car.camera:rotate(transformation.z, -deg * car.coeff_z)
 
-   car.eye:update(dt, car.axes:get(2), car.coeff * car.speed)
+   car.camera:translate(car.camera:getY(), dt * car.coeff * car.speed)
 
-   car.P:camera(car.eye.pos, car.axes, car.dir_sign)
+   car.P:setCamera(car.camera, car.dir_sign)
 end
 
 function love.gamepadaxis(joystick, axis, value)

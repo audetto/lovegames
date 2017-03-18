@@ -25,9 +25,9 @@ local function line(self, theLine)
       local bx, by = self:convert(pb)
 
       local centroid = theLine.centroid
-      local eye = self.perspective.eye
+      local camera = self.perspective.camera.translation
 
-      local connecting = (relative and centroid) or vector.add(self.work, eye, -1, centroid)
+      local connecting = (relative and centroid) or vector.add(self.work, camera, -1, centroid)
 
       local dist = connecting:norm()
       table.insert(self.buffer, {dist = dist, action = function ()
@@ -52,9 +52,9 @@ local function polygon(self, mode, face)
 
    local centroid = face.centroid
    local normal = face.normal
-   local eye = self.perspective.eye
+   local camera = self.perspective.camera.translation
 
-   local connecting = vector.add(self.work, eye, -1, centroid)
+   local connecting = vector.add(self.work, camera, -1, centroid)
 
    local cos = vector.cosangle(connecting, normal)
 

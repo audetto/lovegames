@@ -3,9 +3,8 @@ local matrix = require("matrix")
 
 local M = {}
 
-local function camera(self, eye, direction, sign)
-   self.eye = eye
-   self.rotation = direction.axes
+local function setCamera(self, camera, sign)
+   self.camera = camera
    self.sign = sign
 end
 
@@ -17,8 +16,8 @@ local function projection(self, res, point, relative)
       -- while it is always relative ahead now
       srt = point
    else
-      srt = vector.add(self.work1, point, -1, self.eye)
-      srt = matrix.mulmv(res, self.rotation, srt)
+      srt = vector.add(self.work1, point, -1, self.camera.translation)
+      srt = matrix.mulmv(res, self.camera.rotation, srt)
       srt[1] = srt[1] * self.sign
       srt[2] = srt[2] * self.sign
    end
@@ -69,7 +68,7 @@ local function new()
 
    p.eps = 0.01
 
-   p.camera = camera
+   p.setCamera = setCamera
    p.projection = projection
    p.line = line
 
