@@ -1,6 +1,6 @@
 local colors = require("colors")
 local vector = require("vector")
-local solid = require("solid")
+local scene = require("scene")
 
 local M = {}
 
@@ -13,7 +13,7 @@ local function createLine(self, color, angle, ratio)
 
    local b = vector.new({a[1] + x, a[2], a[3] + z})
 
-   local line = solid.newLine(color, a, b)
+   local line = scene.newLine(color, a, b)
    return line
 end
 
@@ -61,7 +61,7 @@ function M.new(position, size)
    p.lines = {}
 
    for i = 1, p.steps do
-      local line = solid.newLine(colors.olive, border[i], border[i + 1])
+      local line = scene.newLine(colors.olive, border[i], border[i + 1])
       table.insert(p.lines, line)
    end
 

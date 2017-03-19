@@ -5,13 +5,13 @@ local transformation = require("transformation")
 local vector = require("vector")
 local clock = require("clock")
 local colors = require("colors")
-local solid = require("solid")
+local scene = require("scene")
 
 -- missing strict is not an error
 pcall(function() require("strict") end)
 
 local function viewfinder()
-   local points = solid.new()
+   local points = scene.new()
 
    local size = 0.05
    local dist = 1
@@ -28,7 +28,7 @@ local function viewfinder()
 end
 
 local function boundaries(p1, p2)
-   local points = solid.new()
+   local points = scene.new()
 
    love.graphics.setColor(colors.gray)
 
@@ -70,10 +70,10 @@ local function init()
    local p1 = vector.new({0, 0, 0})
    local p2 = vector.new({7, 9, 3})
 
-   car.c1 = shapes.cube(colors.yellow, p1, p2)
-   car.c2 = shapes.cube(colors.silver, vector.new({10, 12, 0}), vector.new({12, 0, -4}))
-   car.c3 = shapes.cube(colors.silver, vector.new({5, 12, 10}), vector.new({12, 20, 14}))
-   car.c4 = shapes.cube(colors.red, vector.new({10, 30, 0}), vector.new({12, 18, -4}))
+   car.c1 = shapes.cube("fill", colors.yellow, p1, p2)
+   car.c2 = shapes.cube("fill", colors.silver, vector.new({10, 12, 0}), vector.new({12, 0, -4}))
+   car.c3 = shapes.cube("fill", colors.silver, vector.new({5, 12, 10}), vector.new({12, 20, 14}))
+   car.c4 = shapes.cube("fill", colors.red, vector.new({10, 30, 0}), vector.new({12, 18, -4}))
 
    car.viewfinder = viewfinder()
    car.boundaries = boundaries(p1, p2)

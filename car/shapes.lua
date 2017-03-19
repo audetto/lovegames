@@ -1,10 +1,10 @@
 local vector = require("vector")
-local solid = require("solid")
+local scene = require("scene")
 
 local M = {}
 
-local function cube(color, p1, p2)
-   local c = solid.new()
+local function cube(mode, color, p1, p2)
+   local c = scene.new()
 
    local a1 = vector.new({p1[1], p1[2], p1[3]})
    local a2 = vector.new({p2[1], p1[2], p1[3]})
@@ -16,7 +16,7 @@ local function cube(color, p1, p2)
    local a7 = vector.new({p2[1], p2[2], p2[3]})
    local a8 = vector.new({p1[1], p2[2], p2[3]})
 
-   if false then
+   if mode == "line" then
       c:addLine(color, a1, a2)
       c:addLine(color, a2, a3)
       c:addLine(color, a3, a4)
