@@ -53,9 +53,15 @@ local function empty()
    return new(x)
 end
 
+local function diag(d)
+   local x = {{d[1], 0, 0}, {0, d[2], 0}, {0, 0, d[3]}}
+   return new(x)
+end
+
 M.toString = toString
 M.new = new
 M.empty = empty
+M.diag = diag
 M.mulmv = mulmv
 M.mulmm = mulmm
 
