@@ -145,6 +145,9 @@ function love.update(dt)
    car.camera:rotate(transformation.x, deg * car.coeff_x)
    car.camera:rotate(transformation.z, -deg * car.coeff_z)
 
+   local rot = matrix.rotation(transformation.y, deg)
+   car.t1:rotate(rot)
+
    car.camera:translate(car.camera:getY(), dt * car.coeff * car.speed)
 
    car.P:setCamera(car.camera, car.dir_sign)

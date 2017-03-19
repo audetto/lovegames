@@ -20,13 +20,8 @@ local function rotate(self, a, angle)
    if angle == 0 then
       return
    end
-   local c = math.cos(angle)
-   local s = math.sin(angle)
-   local rot = matrix.new({
-	 {c + a[1] * a[1] * (1 - c), a[1] * a[2] * (1 - c) - a[3] * s, a[1] * a[3] * (1 - c) + a[2] * s},
-	 {a[2] * a[1] * (1 - c) + a[3] * s, c + a[2] * a[2] * (1 - c), a[2] * a[3] * (1 - c) - a[1] * s},
-	 {a[3] * a[1] * (1 - c) - a[2] * s, a[3] * a[2] * (1 - c) + a[1] * s, c + a[3] * a[3] * (1 - c)}
-   })
+
+   local rot = matrix.rotation(a, angle)
 
    -- premultiply to rotate around local axes
    self.rotation = matrix.mulmm(rot, self.rotation)

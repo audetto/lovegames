@@ -58,10 +58,22 @@ local function diag(d)
    return new(x)
 end
 
+local function rotation(a, angle)
+   local c = math.cos(angle)
+   local s = math.sin(angle)
+   local rot = new({
+	 {c + a[1] * a[1] * (1 - c), a[1] * a[2] * (1 - c) - a[3] * s, a[1] * a[3] * (1 - c) + a[2] * s},
+	 {a[2] * a[1] * (1 - c) + a[3] * s, c + a[2] * a[2] * (1 - c), a[2] * a[3] * (1 - c) - a[1] * s},
+	 {a[3] * a[1] * (1 - c) - a[2] * s, a[3] * a[2] * (1 - c) + a[1] * s, c + a[3] * a[3] * (1 - c)}
+   })
+   return rot
+end
+
 M.toString = toString
 M.new = new
 M.empty = empty
 M.diag = diag
+M.rotation = rotation
 M.mulmv = mulmv
 M.mulmm = mulmm
 
