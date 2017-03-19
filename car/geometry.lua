@@ -3,10 +3,8 @@ local vector = require("vector")
 local M = {}
 
 local function normal(vertices)
-   local a = vector.empty()
-   a = vector.add(a, vertices[3], -1, vertices[2])
-   local b = vector.empty()
-   b = vector.add(b, vertices[1], -1, vertices[2])
+   local a = vector.add(vertices[3], -1, vertices[2])
+   local b = vector.add(vertices[1], -1, vertices[2])
 
    local res = vector.cross(a, b)
    return res
@@ -18,7 +16,7 @@ local function centroid(vertices, k, h)
    -- this is correct only for RECTANGLES
    -- needs to be fixed
    for _, vertex in ipairs(vertices) do
-      res = vector.add(res, res, 1, vertex)
+      res = vector.add(res, 1, vertex)
    end
 
    local n = #vertices

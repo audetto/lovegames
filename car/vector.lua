@@ -16,7 +16,8 @@ local function norm(self)
    return res
 end
 
-local function add(res, x, a, y)
+local function add(x, a, y)
+   local res = M.empty()
    res[1] = x[1] + a * y[1]
    res[2] = x[2] + a * y[2]
    res[3] = x[3] + a * y[3]

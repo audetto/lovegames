@@ -13,7 +13,7 @@ local function translate(self, direction, coeff)
    if coeff == 0 then
       return
    end
-   self.translation = vector.add(self.translation, self.translation, coeff, direction)
+   self.translation = vector.add(self.translation, coeff, direction)
 end
 
 local function rotate(self, a, angle)
@@ -29,8 +29,7 @@ local function rotate(self, a, angle)
    })
 
    -- premultiply to rotate around local axes
-   local new = matrix.mulmm(self.work, rot, self.rotation)
-   self.rotation, self.work = self.work, self.rotation
+   self.rotation = matrix.mulmm(rot, self.rotation)
 end
 
 local function getY(self)
@@ -45,7 +44,6 @@ local function new(point)
    p.translation = point
    p.rotation = matrix.new({{1, 0, 0}, {0, 1, 0}, {0, 0, 1}})
 
-   p.work = matrix.empty()
    p.getY = getY
    p.rotate = rotate
    p.translate = translate

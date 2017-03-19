@@ -11,7 +11,8 @@ end
 
 local mt = {__tostring = toString}
 
-local function mulmv(res, a, b)
+local function mulmv(a, b)
+   local res = vector.empty()
    res[1] = vector.dot(a[1], b)
    res[2] = vector.dot(a[2], b)
    res[3] = vector.dot(a[3], b)
@@ -23,7 +24,8 @@ local function dott(a, b, col)
    return res
 end
 
-local function mulmm(res, a, b)
+local function mulmm(a, b)
+   local res = M.empty()
    res[1][1] = dott(a[1], b, 1)
    res[1][2] = dott(a[1], b, 2)
    res[1][3] = dott(a[1], b, 3)

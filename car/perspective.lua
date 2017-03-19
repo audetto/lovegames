@@ -8,7 +8,7 @@ local function setCamera(self, camera, sign)
    self.sign = sign
 end
 
-local function projection(self, res, point, relative)
+local function projection(self, point, relative)
    local srt
    if relative then
       -- it would be nice to remove the sign
@@ -16,8 +16,8 @@ local function projection(self, res, point, relative)
       -- while it is always relative ahead now
       srt = point
    else
-      srt = vector.add(self.work1, point, -1, self.camera.translation)
-      srt = matrix.mulmv(res, self.camera.rotation, srt)
+      srt = vector.add(point, -1, self.camera.translation)
+      srt = matrix.mulmv(self.camera.rotation, srt)
       srt[1] = srt[1] * self.sign
       srt[2] = srt[2] * self.sign
    end
@@ -38,8 +38,8 @@ local function limitProjection(res, eps, ahead, behind)
 end
 
 local function line(self, a, b, relative)
-   local pa, ra = self:projection(self.work2, a, relative)
-   local pb, rb = self:projection(self.work3, b, relative)
+   local pa, ra = self:projection(a, relative)
+   local pb, rb = self:projection(b, relative)
 
    if ra[2] <= self.eps then
       if rb[2] <= self.eps then
@@ -61,10 +61,6 @@ end
 
 local function new()
    local p = {}
-
-   p.work1 = vector.empty()
-   p.work2 = vector.empty()
-   p.work3 = vector.empty()
 
    p.eps = 0.01
 
