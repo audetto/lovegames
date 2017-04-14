@@ -6,6 +6,7 @@ local M = {}
 local function setCamera(self, camera, sign)
    self.camera = camera
    self.sign = sign
+   self.rotation = matrix.t(self.camera.rotation)
 end
 
 local function projection(self, point, relative)
@@ -17,7 +18,7 @@ local function projection(self, point, relative)
       srt = point
    else
       srt = vector.add(point, -1, self.camera.translation)
-      srt = matrix.mulmv(self.camera.rotation, srt)
+      srt = matrix.mulmv(self.rotation, srt)
       srt[1] = srt[1] * self.sign
       srt[2] = srt[2] * self.sign
    end

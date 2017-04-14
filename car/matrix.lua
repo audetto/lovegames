@@ -58,6 +58,14 @@ local function diag(d)
    return new(x)
 end
 
+local function t(self)
+   return new({
+	 {self[1][1], self[2][1], self[3][1]},
+	 {self[1][2], self[2][2], self[3][2]},
+	 {self[1][3], self[2][3], self[3][3]}
+   })
+end
+
 local function rotation(a, angle)
    local c = math.cos(angle)
    local s = math.sin(angle)
@@ -76,5 +84,6 @@ M.diag = diag
 M.rotation = rotation
 M.mulmv = mulmv
 M.mulmm = mulmm
+M.t = t
 
 return M

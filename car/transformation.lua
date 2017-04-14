@@ -23,12 +23,12 @@ local function rotate(self, a, angle)
 
    local rot = matrix.rotation(a, angle)
 
-   -- premultiply to rotate around local axes
-   self.rotation = matrix.mulmm(rot, self.rotation)
+   -- postmultiply to rotate around local axes
+   self.rotation = matrix.mulmm(self.rotation, rot)
 end
 
 local function getY(self)
-   return self.rotation[2]
+   return vector.new({self.rotation[1][2], self.rotation[2][2], self.rotation[3][2]})
 end
 
 local function new(point)

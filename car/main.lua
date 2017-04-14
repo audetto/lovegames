@@ -157,9 +157,9 @@ function love.gamepadaxis(joystick, axis, value)
    if axis == "lefty" then
       car.coeff = -value * value * value
    elseif axis == "rightx" then
-      car.coeff_z = -value * value * value
+      car.coeff_z = value * value * value
    elseif axis == "righty" then
-      car.coeff_x = value * value * value
+      car.coeff_x = -value * value * value
    end
 end
 
