@@ -19,11 +19,11 @@ local function viewfinder()
 
    local a1 = vector.new({-size, dist, 0})
    local b1 = vector.new({size, dist, 0})
-   points:addLine(colors.red, a1, b1, true)
+   points:addLine(colors.red, a1, b1)
 
    local a2 = vector.new({0, dist, size})
    local b2 = vector.new({0, dist, -size})
-   points:addLine(colors.red, a2, b2, true)
+   points:addLine(colors.red, a2, b2)
 
    return points
 end
@@ -123,7 +123,7 @@ function love.draw()
 
    car.clock:draw(car.cnv3d)
    car.boundaries:draw(car.cnv3d)
-   car.viewfinder:draw(car.cnv3d)
+--   car.viewfinder:draw(car.cnv3d)
 
    car.cnv3d:draw()
 
@@ -148,7 +148,7 @@ function love.update(dt)
    local rot = matrix.rotation(transformation.y, deg)
    car.t1:rotate(rot)
 
-   car.camera:translate(car.camera:getY(), dt * car.coeff * car.speed)
+   car.camera:translate(transformation.y, dt * car.coeff * car.speed)
 
    car.P:setCamera(car.camera, car.dir_sign)
 end

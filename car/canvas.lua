@@ -17,8 +17,7 @@ end
 
 local function line(self, theLine)
    local vertices = theLine.vertices
-   local relative = theLine.relative
-   local pa, pb = self.perspective:line(vertices[1], vertices[2], relative)
+   local pa, pb = self.perspective:line(vertices[1], vertices[2])
 
    if pa and pb then
       local ax, ay = self:convert(pa)
@@ -27,7 +26,7 @@ local function line(self, theLine)
       local centroid = theLine.centroid
       local camera = self.perspective.camera.translation
 
-      local connecting = (relative and centroid) or vector.add(camera, -1, centroid)
+      local connecting = vector.add(camera, -1, centroid)
 
       local dist = connecting:norm()
       table.insert(self.buffer, {dist = dist, action = function ()

@@ -4,24 +4,15 @@ local matrix = require("matrix")
 local M = {}
 
 local function setCamera(self, camera, sign)
-   self.camera = camera
    self.sign = sign
-   self.rotation = matrix.t(self.camera.rotation)
+   self.camera = camera
+   self.rotation = matrix.inverse(self.camera.rotation)
 end
 
-local function projection(self, point, relative)
-   local srt
-   if relative then
-      -- it would be nice to remove the sign
-      -- so that we have relative ahead and behind
-      -- while it is always relative ahead now
-      srt = point
-   else
-      srt = vector.add(point, -1, self.camera.translation)
-      srt = matrix.mulmv(self.rotation, srt)
-      srt[1] = srt[1] * self.sign
-      srt[2] = srt[2] * self.sign
-   end
+local function projection(self, point)
+   local srt = matrix.mulmv(self.rotation, point)
+   srt[1] = srt[1] * self.sign
+   srt[2] = srt[2] * self.sign
    local ret = {srt[1] / srt[2], srt[3] / srt[2]}
    return ret, srt
 end
@@ -38,9 +29,9 @@ local function limitProjection(res, eps, ahead, behind)
    res[2] = new_z / new_y
 end
 
-local function line(self, a, b, relative)
-   local pa, ra = self:projection(a, relative)
-   local pb, rb = self:projection(b, relative)
+local function line(self, a, b)
+   local pa, ra = self:projection(a)
+   local pb, rb = self:projection(b)
 
    if ra[2] <= self.eps then
       if rb[2] <= self.eps then

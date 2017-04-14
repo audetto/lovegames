@@ -1,17 +1,22 @@
 local M = {}
 
 local function toString(a)
-   local str = string.format("{ %.2f, %.2f, %.2f }", a[1], a[2], a[3])
+   local str = string.format("{ %.2f, %.2f, %.2f, %.2f }", a[1], a[2], a[3], a[4])
    return str
 end
 
 local function dot(self, b)
+   local res = self[1] * b[1] + self[2] * b[2] + self[3] * b[3] + self[4] * b[4]
+   return res
+end
+
+local function dot3(self, b)
    local res = self[1] * b[1] + self[2] * b[2] + self[3] * b[3]
    return res
 end
 
 local function norm(self)
-   local res = dot(self, self)
+   local res = dot3(self, self)
    res = math.sqrt(res)
    return res
 end
@@ -21,11 +26,13 @@ local function add(x, a, y)
    res[1] = x[1] + a * y[1]
    res[2] = x[2] + a * y[2]
    res[3] = x[3] + a * y[3]
+   res[4] = x[4]
+
    return res
 end
 
 local function cosangle(self, b)
-   local d = dot(self, b)
+   local d = dot3(self, b)
    local na = norm(self)
    local nb = norm(b)
 
@@ -39,10 +46,11 @@ local function angle(self, b)
 end
 
 local function cross(a, b)
-   local res = {}
+   local res = M.empty()
    res[1] = a[2] * b[3] - a[3] * b[2]
    res[2] = a[3] * b[1] - a[1] * b[3]
    res[3] = a[1] * b[2] - a[2] * b[1]
+
    return res
 end
 
@@ -52,17 +60,19 @@ local function new(x)
    setmetatable(x, mt)
    x.norm = norm
    x.dot = dot
+   x.dot3 = dot3
    x.angle = angle
+   x[4] = x[4] or 1
    return x
 end
 
 local function empty()
-   local x = {0, 0, 0}
+   local x = {0, 0, 0, 1}
    return new(x)
 end
 
 local function clone(x)
-   local y = {x[1], x[2], x[3]}
+   local y = {x[1], x[2], x[3], x[4]}
    return new(y)
 end
 
@@ -71,7 +81,9 @@ M.angle = angle
 M.cosangle = cosangle
 M.norm = norm
 M.add = add
+M.scale = scale
 M.new = new
+M.direction = direction
 M.empty = empty
 M.dot = dot
 M.clone = clone

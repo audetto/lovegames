@@ -16,10 +16,10 @@ local function rotateVertices(vertices, rotation)
    end
 end
 
-local function newLine(color, a, b, relative)
+local function newLine(color, a, b)
    local vertices = {a, b}
    local centroid = geometry.centroid(vertices)
-   local line = {vertices = vertices, centroid = centroid, color = color, relative = relative}
+   local line = {vertices = vertices, centroid = centroid, color = color}
    return line
 end
 

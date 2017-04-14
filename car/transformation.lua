@@ -4,7 +4,7 @@ local matrix = require("matrix")
 local M = {}
 
 local function toString(self)
-   return "Translation: " .. vector.toString(self.translation) .. "\nRotation: " .. matrix.toString(self.rotation)
+   return "Rotation: " .. matrix.toString(self.rotation)
 end
 
 local mt = { __tostring = toString }
@@ -13,7 +13,12 @@ local function translate(self, direction, coeff)
    if coeff == 0 then
       return
    end
-   self.translation = vector.add(self.translation, coeff, direction)
+
+   local rot = matrix.translation(direction, coeff)
+
+   -- postmultiply to rotate around local axes
+   self.rotation = matrix.mulmm(self.rotation, rot)
+   self.translation = vector.new({self.rotation[1][4], self.rotation[2][4], self.rotation[3][4], self.rotation[4][4]})
 end
 
 local function rotate(self, a, angle)
@@ -25,6 +30,7 @@ local function rotate(self, a, angle)
 
    -- postmultiply to rotate around local axes
    self.rotation = matrix.mulmm(self.rotation, rot)
+   self.translation = vector.new({self.rotation[1][4], self.rotation[2][4], self.rotation[3][4], self.rotation[4][4]})
 end
 
 local function getY(self)
@@ -36,8 +42,8 @@ local function new(point)
 
    setmetatable(p, mt)
 
-   p.translation = point
-   p.rotation = matrix.new({{1, 0, 0}, {0, 1, 0}, {0, 0, 1}})
+   p.rotation = matrix.new({{1, 0, 0, point[1]}, {0, 1, 0, point[2]}, {0, 0, 1, point[3]}, {0, 0, 0, 1}})
+   p.translation = vector.new({p.rotation[1][4], p.rotation[2][4], p.rotation[3][4], p.rotation[4][4]})
 
    p.getY = getY
    p.rotate = rotate
