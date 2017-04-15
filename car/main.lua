@@ -64,7 +64,8 @@ local function init()
    car.speed = 5
    car.north = vector.new({0, 0, 1})
 
-   car.camera = transformation.new(vector.new({11, -15, 2}))
+   car.camera = transformation.new()
+   car.camera:translate(vector.new({11, -15, 2}), 1)
 
    car.cnv3d = canvas.new(car.P, 500)
 
@@ -91,7 +92,7 @@ local function init()
    car.o1 = shapes.octahedron(colors.cyan)
 
    car.t1:rotate(matrix.diag({5, 5, 5}))
-   car.t1:translate(vector.new({20, 20, 0}))
+   car.t1.transformation:translate(vector.new({20, 20, 0}), 1)
 
    car.o1:rotate(matrix.diag({6, 6, 6}))
    car.o1:translate(vector.new({-20, 20, 0}))
@@ -114,6 +115,9 @@ end
 local car = init()
 
 function love.draw()
+   car.P.sign = car.dir_sign
+   car.cnv3d:push(matrix.inverse(car.camera.rotation))
+
    car.c1:draw(car.cnv3d)
    car.c2:draw(car.cnv3d)
    car.c3:draw(car.cnv3d)
@@ -127,11 +131,14 @@ function love.draw()
 
    car.cnv3d:draw()
 
+   car.cnv3d:pop()
+
    love.graphics.setColor(colors.white)
 
+   local position = car.camera.rotation:column(4)
    local direction = car.camera:getY()
 
-   love.graphics.print("Position: " .. tostring(car.camera.translation), 400, 500)
+   love.graphics.print("Position: " .. tostring(position), 400, 500)
    love.graphics.print("Direction: " .. tostring(direction), 400, 515)
    love.graphics.print("Norm: " .. direction:norm(), 400, 530)
    local angle = direction:angle(car.north) / (math.pi * 2) * 360
@@ -142,15 +149,14 @@ end
 function love.update(dt)
    local deg = dt * math.pi / 4
 
+   car.t1.transformation:rotate(transformation.y, 2 * deg)
+   car.t1.transformation:rotate(transformation.x, deg)
+   car.t1.transformation:rotate(transformation.z, deg / 2)
+
    car.camera:rotate(transformation.x, deg * car.coeff_x)
    car.camera:rotate(transformation.z, -deg * car.coeff_z)
 
-   local rot = matrix.rotation(transformation.y, deg)
-   car.t1:rotate(rot)
-
    car.camera:translate(transformation.y, dt * car.coeff * car.speed)
-
-   car.P:setCamera(car.camera, car.dir_sign)
 end
 
 function love.gamepadaxis(joystick, axis, value)

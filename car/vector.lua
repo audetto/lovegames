@@ -50,6 +50,10 @@ local function cross(a, b)
    res[2] = a[3] * b[1] - a[1] * b[3]
    res[3] = a[1] * b[2] - a[2] * b[1]
 
+   -- this is super important as we will be applying the matrix transformation
+   -- when drawing and transations should be ignored
+   res[4] = 0
+
    return res
 end
 
@@ -70,11 +74,6 @@ local function empty()
    return new(x)
 end
 
-local function clone(x)
-   local y = {x[1], x[2], x[3], x[4]}
-   return new(y)
-end
-
 M.toString = toString
 M.angle = angle
 M.cosangle = cosangle
@@ -85,7 +84,6 @@ M.new = new
 M.direction = direction
 M.empty = empty
 M.dot = dot
-M.clone = clone
 M.cross = cross
 
 return M

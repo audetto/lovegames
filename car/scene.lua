@@ -1,6 +1,7 @@
 local vector = require("vector")
 local matrix = require("matrix")
 local geometry = require("geometry")
+local transformation = require("transformation")
 
 local M = {}
 
@@ -37,6 +38,8 @@ local function addFace(self, color, ...)
 end
 
 local function draw(self, canvas3d)
+   canvas3d:push(self.transformation.rotation)
+
    for _, line in ipairs(self.lines) do
       canvas3d:line(line)
    end
@@ -44,6 +47,8 @@ local function draw(self, canvas3d)
    for _, face in ipairs(self.faces) do
       canvas3d:polygon("fill", face)
    end
+
+   canvas3d:pop()
 end
 
 local function translate(self, translation)
@@ -78,6 +83,7 @@ local function new()
 
    c.lines = {}
    c.faces = {}
+   c.transformation = transformation.new()
 
    c.addLine = addLine
    c.addFace = addFace

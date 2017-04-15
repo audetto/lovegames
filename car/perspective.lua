@@ -3,10 +3,8 @@ local matrix = require("matrix")
 
 local M = {}
 
-local function setCamera(self, camera, sign)
-   self.sign = sign
-   self.camera = camera
-   self.rotation = matrix.inverse(self.camera.rotation)
+local function setCamera(self, rotation)
+   self.rotation = rotation
 end
 
 local function projection(self, point)
@@ -54,6 +52,7 @@ end
 local function new()
    local p = {}
 
+   p.sign = 1
    p.eps = 0.01
 
    p.setCamera = setCamera

@@ -1,4 +1,5 @@
 local vector = require("vector")
+local matrix = require("matrix")
 
 local M = {}
 
@@ -23,12 +24,9 @@ local function line(self, theLine)
       local ax, ay = self:convert(pa)
       local bx, by = self:convert(pb)
 
-      local centroid = theLine.centroid
-      local camera = self.perspective.camera.translation
+      local rotatedCentroid = matrix.mulmv(self.current, theLine.centroid)
 
-      local connecting = vector.add(camera, -1, centroid)
-
-      local dist = connecting:norm()
+      local dist = rotatedCentroid:norm()
       table.insert(self.buffer, {dist = dist, action = function ()
 				    love.graphics.setColor(theLine.color)
 				    love.graphics.line(ax, ay, bx, by)
@@ -49,13 +47,10 @@ local function polygon(self, mode, face)
    local n = #vertices
    local prev = vertices[n]
 
-   local centroid = face.centroid
-   local normal = face.normal
-   local camera = self.perspective.camera.translation
+   local rotatedCentroid = matrix.mulmv(self.current, face.centroid)
+   local rotatedNormal = matrix.mulmv(self.current, face.normal) -- normal[4] = 0!!!
 
-   local connecting = vector.add(camera, -1, centroid)
-
-   local cos = vector.cosangle(connecting, normal)
+   local cos = -vector.cosangle(rotatedCentroid, rotatedNormal)
 
    if cos < self.cosThreshold then
       -- we cannot see the face
@@ -81,7 +76,7 @@ local function polygon(self, mode, face)
    end
 
    if #points > 4 then
-      local dist = connecting:norm()
+      local dist = rotatedCentroid:norm()
       table.insert(self.buffer, {dist = dist, action = function ()
 				    love.graphics.setColor(face.color[1] * cos, face.color[2] * cos, face.color[3] * cos)
 				    love.graphics.polygon(mode, points)
@@ -103,12 +98,34 @@ local function draw(self)
    self.buffer = {}
 end
 
+local function push(self, mat)
+   local last = #self.matrices
+   if last == 0 then
+      self.current = mat
+   else
+      self.current = matrix.mulmm(self.matrices[last], mat)
+   end
+   self.perspective:setCamera(self.current)
+   self.matrices[last + 1] = self.current
+end
+
+local function pop(self)
+   local last = #self.matrices
+   self.matrices[last] = nil
+   if last == 0 then
+      self.current = nil
+   else
+      self.current = self.matrices[last - 1]
+   end
+end
 
 local function new(perspective, scale)
    local c = {}
 
    c.buffer = {}
    c.cosThreshold = 0.01
+   c.matrices = {}
+
    c.perspective = perspective
    c.convert = convert
    c.line = line
@@ -116,6 +133,8 @@ local function new(perspective, scale)
    c.polygon = polygon
    c.addPoint = addPoint
    c.draw = draw
+   c.push = push
+   c.pop = pop
 
    c.scale = scale
    c.width = love.graphics.getWidth()
