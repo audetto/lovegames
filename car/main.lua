@@ -69,35 +69,34 @@ local function init()
 
    car.cnv3d = canvas.new(car.P, 500)
 
-   local p1 = vector.new({0, 0, 0})
-   local p2 = vector.new({7, 9, 3})
-
    car.c1 = shapes.cube(colors.yellow)
-   car.c1:rotate(matrix.diag({7, 9, 3}))
    car.c1:translate(vector.new({3.5, 4.5, 1.5}))
+   car.c1:rotate(matrix.diag({7, 9, 3}))
 
    car.c2 = shapes.cube(colors.silver)
-   car.c2:rotate(matrix.diag({2, 12, 4}))
    car.c2:translate(vector.new({11, 6, -2}))
+   car.c2:rotate(matrix.diag({2, 12, 4}))
 
    car.c3 = shapes.cube(colors.silver)
-   car.c3:rotate(matrix.diag({7, 8, 4}))
    car.c3:translate(vector.new({8.5, 16, 12}))
+   car.c3:rotate(matrix.diag({7, 8, 4}))
 
    car.c4 = shapes.cube(colors.red)
-   car.c4:rotate(matrix.diag({2, 12, 4}))
    car.c4:translate(vector.new({11, 24, -2}))
+   car.c4:rotate(matrix.diag({2, 12, 4}))
 
    car.t1 = shapes.tetrahedron(colors.blue)
-   car.o1 = shapes.octahedron(colors.cyan)
-
+   car.t1:translate(vector.new({20, 20, 0}))
    car.t1:rotate(matrix.diag({5, 5, 5}))
-   car.t1.transformation:translate(vector.new({20, 20, 0}), 1)
 
-   car.o1:rotate(matrix.diag({6, 6, 6}))
+   car.o1 = shapes.octahedron(colors.cyan)
    car.o1:translate(vector.new({-20, 20, 0}))
+   car.o1:rotate(matrix.diag({6, 6, 6}))
 
    car.viewfinder = viewfinder()
+
+   local p1 = vector.new({0, 0, 0})
+   local p2 = vector.new({7, 9, 3})
    car.boundaries = boundaries(p1, p2)
 
    local pos_clock = vector.new({0, 50, 30})

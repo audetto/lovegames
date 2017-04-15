@@ -31,6 +31,11 @@ local function rotate(self, a, angle)
    self.rotation = matrix.mulmm(self.rotation, rot)
 end
 
+local function generic(self, m)
+   -- postmultiply to rotate around local axes
+   self.rotation = matrix.mulmm(self.rotation, m)
+end
+
 local function getY(self)
    return self.rotation:column(2)
 end
@@ -45,6 +50,7 @@ local function new()
    p.getY = getY
    p.rotate = rotate
    p.translate = translate
+   p.generic = generic
 
    return p
 end
