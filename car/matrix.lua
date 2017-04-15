@@ -53,6 +53,11 @@ local function mulmm(a, b)
    return res
 end
 
+local function column(self, i)
+   local col = vector.new({self[1][i], self[2][i], self[3][i], self[4][i]})
+   return col
+end
+
 local function new(x)
    setmetatable(x, mt)
 
@@ -60,6 +65,8 @@ local function new(x)
    x[2] = vector.new(x[2])
    x[3] = vector.new(x[3])
    x[4] = vector.new(x[4])
+
+   x.column = column
 
    return x
 end
@@ -83,8 +90,9 @@ local function inverse(self)
 	 {self[1][3], self[2][3], self[3][3], 0},
 	 {0,          0,          0,          1}
    })
-   local p = vector.new({self[1][4], self[2][4], self[3][4], 1})
+   local p = self:column(4)
    local d = mulmv(t, p)
+
    t[1][4] = -d[1]
    t[2][4] = -d[2]
    t[3][4] = -d[3]

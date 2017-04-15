@@ -18,7 +18,7 @@ local function translate(self, direction, coeff)
 
    -- postmultiply to rotate around local axes
    self.rotation = matrix.mulmm(self.rotation, rot)
-   self.translation = vector.new({self.rotation[1][4], self.rotation[2][4], self.rotation[3][4], self.rotation[4][4]})
+   self.translation = self.rotation:column(4)
 end
 
 local function rotate(self, a, angle)
@@ -30,11 +30,11 @@ local function rotate(self, a, angle)
 
    -- postmultiply to rotate around local axes
    self.rotation = matrix.mulmm(self.rotation, rot)
-   self.translation = vector.new({self.rotation[1][4], self.rotation[2][4], self.rotation[3][4], self.rotation[4][4]})
+   self.translation = self.rotation:column(4)
 end
 
 local function getY(self)
-   return vector.new({self.rotation[1][2], self.rotation[2][2], self.rotation[3][2]})
+   return self.rotation:column(2)
 end
 
 local function new(point)
@@ -43,7 +43,7 @@ local function new(point)
    setmetatable(p, mt)
 
    p.rotation = matrix.new({{1, 0, 0, point[1]}, {0, 1, 0, point[2]}, {0, 0, 1, point[3]}, {0, 0, 0, 1}})
-   p.translation = vector.new({p.rotation[1][4], p.rotation[2][4], p.rotation[3][4], p.rotation[4][4]})
+   p.translation = p.rotation:column(4)
 
    p.getY = getY
    p.rotate = rotate
