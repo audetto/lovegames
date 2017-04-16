@@ -11,19 +11,18 @@ local scene = require("scene")
 -- missing strict is not an error
 pcall(function() require("strict") end)
 
-local function viewfinder()
+local function viewfinder(color, dist)
    local points = scene.new()
 
    local size = 0.05
-   local dist = 1
 
    local a1 = vector.new({-size, dist, 0})
    local b1 = vector.new({size, dist, 0})
-   points:addLine(colors.red, a1, b1)
+   points:addLine(color, a1, b1)
 
    local a2 = vector.new({0, dist, size})
    local b2 = vector.new({0, dist, -size})
-   points:addLine(colors.red, a2, b2)
+   points:addLine(color, a2, b2)
 
    return points
 end
@@ -70,30 +69,31 @@ local function init()
    car.cnv3d = canvas.new(car.P, 500)
 
    car.c1 = shapes.cube(colors.yellow)
-   car.c1:translate(vector.new({3.5, 4.5, 1.5}))
-   car.c1:rotate(matrix.diag({7, 9, 3}))
+   car.c1:translate(vector.new({3.5, 4.5, 1.5}), 1)
+   car.c1:scale({7, 9, 3})
 
    car.c2 = shapes.cube(colors.silver)
-   car.c2:translate(vector.new({11, 6, -2}))
-   car.c2:rotate(matrix.diag({2, 12, 4}))
+   car.c2:translate(vector.new({11, 6, -2}), 1)
+   car.c2:scale({2, 12, 4})
 
    car.c3 = shapes.cube(colors.silver)
-   car.c3:translate(vector.new({8.5, 16, 12}))
-   car.c3:rotate(matrix.diag({7, 8, 4}))
+   car.c3:translate(vector.new({8.5, 16, 12}), 1)
+   car.c3:scale({7, 8, 4})
 
    car.c4 = shapes.cube(colors.red)
-   car.c4:translate(vector.new({11, 24, -2}))
-   car.c4:rotate(matrix.diag({2, 12, 4}))
+   car.c4:translate(vector.new({11, 24, -2}), 1)
+   car.c4:scale({2, 12, 4})
 
    car.t1 = shapes.tetrahedron(colors.blue)
-   car.t1:translate(vector.new({20, 20, 0}))
-   car.t1:rotate(matrix.diag({5, 5, 5}))
+   car.t1:translate(vector.new({20, 20, 0}), 1)
+   car.t1:scale({5, 5, 5})
 
    car.o1 = shapes.octahedron(colors.cyan)
-   car.o1:translate(vector.new({-20, 20, 0}))
-   car.o1:rotate(matrix.diag({6, 6, 6}))
+   car.o1:translate(vector.new({-20, 20, 0}), 1)
+   car.o1:scale({6, 6, 6})
 
-   car.viewfinder = viewfinder()
+   car.viewfinder1 = viewfinder(colors.red, 1) -- ahead
+   car.viewfinder2 = viewfinder(colors.green, -1) -- behind
 
    local p1 = vector.new({0, 0, 0})
    local p2 = vector.new({7, 9, 3})
@@ -115,6 +115,13 @@ local car = init()
 
 function love.draw()
    car.P.sign = car.dir_sign
+
+   -- these are drawn before the center of the world
+   -- i.e. relative to camera
+   car.viewfinder1:draw(car.cnv3d)
+   car.viewfinder2:draw(car.cnv3d)
+
+   -- from camera to the center of the world
    car.cnv3d:push(matrix.inverse(car.camera.rotation))
 
    car.c1:draw(car.cnv3d)
@@ -126,7 +133,6 @@ function love.draw()
 
    car.clock:draw(car.cnv3d)
    car.boundaries:draw(car.cnv3d)
---   car.viewfinder:draw(car.cnv3d)
 
    car.cnv3d:draw()
 
@@ -148,13 +154,15 @@ end
 function love.update(dt)
    local deg = dt * math.pi / 4
 
-   car.t1.transformation:rotate(transformation.y, 2 * deg)
-   car.t1.transformation:rotate(transformation.x, deg)
-   car.t1.transformation:rotate(transformation.z, deg / 2)
+   car.t1:rotate(transformation.y, 2 * deg)
+   car.t1:rotate(transformation.x, deg)
+   car.t1:rotate(transformation.z, deg / 2)
 
+   -- rotate around local x and z
    car.camera:rotate(transformation.x, deg * car.coeff_x)
    car.camera:rotate(transformation.z, -deg * car.coeff_z)
 
+   -- move along local y
    car.camera:translate(transformation.y, dt * car.coeff * car.speed)
 end
 

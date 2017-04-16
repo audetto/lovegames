@@ -5,9 +5,9 @@ local transformation = require("transformation")
 
 local M = {}
 
-local function transformVertices(vertices, rotation)
+local function transformVertices(vertices, transformation)
    for i, vertex in ipairs(vertices) do
-      vertices[i] = matrix.mulmv(rotation, vertex)
+      vertices[i] = transformation:transform(vertex)
    end
 end
 
@@ -45,22 +45,26 @@ local function draw(self, canvas3d)
    canvas3d:pop()
 end
 
-local function translate(self, translation)
-   self.transformation:translate(translation, 1)
+local function translate(self, ...)
+   self.transformation:translate(...)
 end
 
-local function rotate(self, rotation)
-   self.transformation:generic(rotation)
+local function rotate(self, ...)
+   self.transformation:rotate(...)
+end
+
+local function scale(self, ...)
+   self.transformation:scale(...)
 end
 
 local function apply(self)
    for _, line in ipairs(self.lines) do
-      transformVertices(line.vertices, self.transformation.rotation)
+      transformVertices(line.vertices, self.transformation)
       line.centroid = geometry.centroid(line.vertices)
    end
 
    for _, face in ipairs(self.faces) do
-      transformVertices(face.vertices, self.transformation.rotation)
+      transformVertices(face.vertices, self.transformation)
       face.normal = geometry.normal(face.vertices)
       face.centroid = geometry.centroid(face.vertices)
    end
@@ -81,6 +85,7 @@ local function new()
    c.addFace = addFace
    c.translate = translate
    c.rotate = rotate
+   c.scale = scale
    c.apply = apply
 
    return c

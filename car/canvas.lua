@@ -24,7 +24,7 @@ local function line(self, theLine)
       local ax, ay = self:convert(pa)
       local bx, by = self:convert(pb)
 
-      local rotatedCentroid = matrix.mulmv(self.current, theLine.centroid)
+      local rotatedCentroid = self:transform(theLine.centroid)
 
       local dist = rotatedCentroid:norm()
       table.insert(self.buffer, {dist = dist, action = function ()
@@ -41,14 +41,18 @@ local function lines(self, theLines)
    end
 end
 
+local function transform(self, x)
+   return matrix.mulmv(self.current, x)
+end
+
 local function polygon(self, mode, face)
    local vertices = face.vertices
    local points = {}
    local n = #vertices
    local prev = vertices[n]
 
-   local rotatedCentroid = matrix.mulmv(self.current, face.centroid)
-   local rotatedNormal = matrix.mulmv(self.current, face.normal) -- normal[4] = 0!!!
+   local rotatedCentroid = self:transform(face.centroid)
+   local rotatedNormal = self:transform(face.normal) -- normal[4] = 0!!!
 
    local cos = -vector.cosangle(rotatedCentroid, rotatedNormal)
 
@@ -100,11 +104,7 @@ end
 
 local function push(self, mat)
    local last = #self.matrices
-   if last == 0 then
-      self.current = mat
-   else
-      self.current = matrix.mulmm(self.matrices[last], mat)
-   end
+   self.current = matrix.mulmm(self.matrices[last], mat)
    self.perspective:setCamera(self.current)
    self.matrices[last + 1] = self.current
 end
@@ -112,11 +112,7 @@ end
 local function pop(self)
    local last = #self.matrices
    self.matrices[last] = nil
-   if last == 0 then
-      self.current = nil
-   else
-      self.current = self.matrices[last - 1]
-   end
+   self.current = self.matrices[last - 1]
 end
 
 local function new(perspective, scale)
@@ -124,7 +120,7 @@ local function new(perspective, scale)
 
    c.buffer = {}
    c.cosThreshold = 0.01
-   c.matrices = {}
+   c.matrices = { matrix.id() }
 
    c.perspective = perspective
    c.convert = convert
@@ -132,6 +128,7 @@ local function new(perspective, scale)
    c.lines = lines
    c.polygon = polygon
    c.addPoint = addPoint
+   c.transform = transform
    c.draw = draw
    c.push = push
    c.pop = pop

@@ -81,6 +81,11 @@ local function diag(d)
    return new(x)
 end
 
+local function id()
+   local x = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}
+   return new(x)
+end
+
 local function inverse(self)
    -- only correct if this is a real ROTATION
    -- i.e. not scaling
@@ -127,6 +132,7 @@ M.toString = toString
 M.new = new
 M.empty = empty
 M.diag = diag
+M.id = id
 M.rotation = rotation
 M.translation = translation
 M.mulmv = mulmv
