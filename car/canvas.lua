@@ -54,6 +54,7 @@ local function polygon(self, mode, face)
    local rotatedCentroid = self:transform(face.centroid)
    local rotatedNormal = self:transform(face.normal) -- normal[4] = 0!!!
 
+   -- "-" as centroid is upside down
    local cos = -vector.cosangle(rotatedCentroid, rotatedNormal)
 
    if cos < self.cosThreshold then
