@@ -60,10 +60,14 @@ local function centroid(vertices)
    -- which we use as a backup in case the following method does not work
 
    if #vertices > 3 then
+      -- project the polygon on the 3 axes
       local c_x1, c_y1 = centroid2d(vertices, 1, 2)
       local c_y2, c_z1 = centroid2d(vertices, 2, 3)
       local c_z2, c_x2 = centroid2d(vertices, 3, 1)
 
+      -- if the projection is not a line
+      -- the values will be computed
+      -- if both values are computed, they should be the same
       res[1] = (c_x1 or c_x2) or res[1]
       res[2] = (c_y1 or c_y2) or res[2]
       res[3] = (c_z1 or c_z2) or res[3]
