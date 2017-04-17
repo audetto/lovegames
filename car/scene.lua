@@ -31,6 +31,10 @@ local function addFace(self, color, ...)
    table.insert(self.faces, face)
 end
 
+local function addScene(self, scene)
+   table.insert(self.scenes, scene)
+end
+
 local function draw(self, canvas3d)
    canvas3d:push(self.transformation.rotation)
 
@@ -40,6 +44,10 @@ local function draw(self, canvas3d)
 
    for _, face in ipairs(self.faces) do
       canvas3d:polygon("fill", face)
+   end
+
+   for _, scene in ipairs(self.scenes) do
+      scene:draw(canvas3d)
    end
 
    canvas3d:pop()
@@ -69,20 +77,26 @@ local function apply(self)
       face.centroid = geometry.centroid(face.vertices)
    end
 
+   for _, scene in ipairs(self.scenes) do
+      scene.transformation:generic(self.transformation.rotation)
+   end
+
    -- reset
    self.transformation = transformation.new()
 end
 
 local function new()
    local c = {}
-   c.draw = draw
 
    c.lines = {}
    c.faces = {}
+   c.scenes = {}
    c.transformation = transformation.new()
 
+   c.draw = draw
    c.addLine = addLine
    c.addFace = addFace
+   c.addScene = addScene
    c.translate = translate
    c.rotate = rotate
    c.scale = scale

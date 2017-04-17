@@ -68,39 +68,58 @@ local function init()
 
    car.cnv3d = canvas.new(car.P, 500)
 
-   car.c1 = shapes.cube(colors.yellow)
-   car.c1:translate(vector.new({3.5, 4.5, 1.5}), 1)
-   car.c1:scale({7, 9, 3})
+   car.static = scene:new()
+   local viewfinder1 = viewfinder(colors.red, 1) -- ahead
+   car.static:addScene(viewfinder1)
 
-   car.c2 = shapes.cube(colors.silver)
-   car.c2:translate(vector.new({11, 6, -2}), 1)
-   car.c2:scale({2, 12, 4})
+   local viewfinder2 = viewfinder(colors.green, -1) -- behind
+   car.static:addScene(viewfinder2)
 
-   car.c3 = shapes.cube(colors.silver)
-   car.c3:translate(vector.new({8.5, 16, 12}), 1)
-   car.c3:scale({7, 8, 4})
+   car.world = scene.new()
 
-   car.c4 = shapes.cube(colors.red)
-   car.c4:translate(vector.new({11, 24, -2}), 1)
-   car.c4:scale({2, 12, 4})
+   local c1 = shapes.cube(colors.yellow)
+   c1:translate(vector.new({3.5, 4.5, 1.5}), 1)
+   c1:scale({7, 9, 3})
+
+   car.world:addScene(c1)
+
+   local c2 = shapes.cube(colors.silver)
+   c2:translate(vector.new({11, 6, -2}), 1)
+   c2:scale({2, 12, 4})
+
+   car.world:addScene(c2)
+
+   local c3 = shapes.cube(colors.silver)
+   c3:translate(vector.new({8.5, 16, 12}), 1)
+   c3:scale({7, 8, 4})
+
+   car.world:addScene(c3)
+
+   local c4 = shapes.cube(colors.red)
+   c4:translate(vector.new({11, 24, -2}), 1)
+   c4:scale({2, 12, 4})
+
+   car.world:addScene(c4)
 
    car.t1 = shapes.tetrahedron(colors.blue)
    car.t1:translate(vector.new({20, 20, 0}), 1)
    car.t1:scale({5, 5, 5})
 
-   car.o1 = shapes.octahedron(colors.cyan)
-   car.o1:translate(vector.new({-20, 20, 0}), 1)
-   car.o1:scale({6, 6, 6})
+   car.world:addScene(car.t1)
 
-   car.viewfinder1 = viewfinder(colors.red, 1) -- ahead
-   car.viewfinder2 = viewfinder(colors.green, -1) -- behind
+   local o1 = shapes.octahedron(colors.cyan)
+   o1:translate(vector.new({-20, 20, 0}), 1)
+   o1:scale({6, 6, 6})
+
+   car.world:addScene(o1)
 
    local p1 = vector.new({0, 0, 0})
    local p2 = vector.new({7, 9, 3})
-   car.boundaries = boundaries(p1, p2)
+   local boundaries = boundaries(p1, p2)
+
+   car.world:addScene(boundaries)
 
    local pos_clock = vector.new({0, 50, 30})
-
    car.clock = clock.new(pos_clock, 20)
 
    car.coeff = 0
@@ -118,25 +137,17 @@ function love.draw()
 
    -- these are drawn before the center of the world
    -- i.e. relative to camera
-   car.viewfinder1:draw(car.cnv3d)
-   car.viewfinder2:draw(car.cnv3d)
+   car.static:draw(car.cnv3d)
 
    -- from camera to the center of the world
    car.cnv3d:push(matrix.inverse(car.camera.rotation))
 
-   car.c1:draw(car.cnv3d)
-   car.c2:draw(car.cnv3d)
-   car.c3:draw(car.cnv3d)
-   car.c4:draw(car.cnv3d)
-   car.t1:draw(car.cnv3d)
-   car.o1:draw(car.cnv3d)
-
+   car.world:draw(car.cnv3d)
    car.clock:draw(car.cnv3d)
-   car.boundaries:draw(car.cnv3d)
-
-   car.cnv3d:draw()
 
    car.cnv3d:pop()
+
+   car.cnv3d:draw()
 
    love.graphics.setColor(colors.white)
 
