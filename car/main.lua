@@ -113,6 +113,18 @@ local function init()
 
    car.world:addScene(o1)
 
+   car.d1 = shapes.dodecahedron(colors.lime)
+   car.d1:translate(vector.new({-20, 70, 30}), 1)
+   car.d1:scale({6, 6, 6})
+
+   car.world:addScene(car.d1)
+
+   car.i1 = shapes.icosahedron(colors.olive)
+   car.i1:translate(vector.new({30, 20, 10}), 1)
+   car.i1:scale({7, 7, 7})
+
+   car.world:addScene(car.i1)
+
    local p1 = vector.new({0, 0, 0})
    local p2 = vector.new({7, 9, 3})
    local boundaries = boundaries(p1, p2)
@@ -168,6 +180,9 @@ function love.update(dt)
    car.t1:rotate(transformation.y, 2 * deg)
    car.t1:rotate(transformation.x, deg)
    car.t1:rotate(transformation.z, deg / 2)
+
+   car.d1:rotate(transformation.x, deg)
+   car.i1:rotate(transformation.z, deg)
 
    -- rotate around local x and z
    car.camera:rotate(transformation.x, deg * car.coeff_x)
