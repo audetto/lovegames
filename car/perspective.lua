@@ -49,6 +49,28 @@ local function line(self, a, b)
 
 end
 
+local function line2(self, a, b)
+   local pa, ra = a[1], a[2]
+   local pb, rb = b[1], b[2]
+
+   if ra[2] <= self.eps then
+      if rb[2] <= self.eps then
+	 return
+      else
+	 limitProjection(pa, self.eps, rb, ra)
+	 return pa, pb, false, true
+      end
+   else
+      if rb[2] <= self.eps then
+	 limitProjection(pb, self.eps, ra, rb)
+	 return pa, pb, true, false
+      else
+	 return pa, pb, true, true
+      end
+   end
+
+end
+
 local function new()
    local p = {}
 
@@ -57,6 +79,7 @@ local function new()
 
    p.setCamera = setCamera
    p.projection = projection
+   p.line2 = line2
    p.line = line
 
    return p

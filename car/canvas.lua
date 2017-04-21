@@ -47,9 +47,6 @@ end
 
 local function polygon(self, mode, face)
    local vertices = face.vertices
-   local points = {}
-   local n = #vertices
-   local prev = vertices[n]
 
    local rotatedCentroid = self:transform(face.centroid)
    local rotatedNormal = self:transform(face.normal) -- normal[4] = 0!!!
@@ -61,6 +58,10 @@ local function polygon(self, mode, face)
       -- we cannot see the face
       return
    end
+
+   local points = {}
+   local n = #vertices
+   local prev = vertices[n]
 
    for i = 1, n do
       local current = vertices[i]
@@ -87,6 +88,61 @@ local function polygon(self, mode, face)
 				    love.graphics.polygon(mode, points)
 						       end
       })
+   end
+end
+
+local function vertexArray(self, vertexArray)
+   local vertices = vertexArray.vertices
+
+   local projectedVertices = {}
+   for i, vertex in ipairs(vertices) do
+      local p, r = self.perspective:projection(vertex)
+      projectedVertices[i] = {p, r}
+   end
+
+   for _, face in ipairs(vertexArray) do
+      local rotatedCentroid = self:transform(face.centroid)
+      local rotatedNormal = self:transform(face.normal) -- normal[4] = 0!!!
+
+      -- "-" as centroid is upside down
+      local cos = -vector.cosangle(rotatedCentroid, rotatedNormal)
+
+      if cos >= self.cosThreshold then
+	 local indexVertices = face.vertices
+
+	 local points = {}
+	 local n = #indexVertices
+	 local prev = projectedVertices[indexVertices[n]]
+
+	 for i = 1, n do
+	    local current = projectedVertices[indexVertices[i]]
+
+	    local pa, pb, orga, _ = self.perspective:line2(prev, current)
+
+	    if pa and pb then
+	       if not orga then
+		  -- the a point has been modified
+		  -- so it wont match the b point of the previous side
+		  -- => we must insert it now
+		  self:addPoint(points, pa)
+	       end
+
+	       -- b point is always inserted
+	       self:addPoint(points, pb)
+	    end
+	    prev = current
+	 end
+
+	 if #points > 4 then
+	    local dist = rotatedCentroid:norm()
+	    table.insert(self.buffer, {dist = dist, action = function ()
+					  love.graphics.setColor(face.color[1] * cos, face.color[2] * cos, face.color[3] * cos)
+					  love.graphics.polygon("fill", points)
+							     end
+	    })
+	 end
+
+      end
    end
 end
 
@@ -128,6 +184,7 @@ local function new(perspective, scale)
    c.line = line
    c.lines = lines
    c.polygon = polygon
+   c.vertexArray = vertexArray
    c.addPoint = addPoint
    c.transform = transform
    c.draw = draw

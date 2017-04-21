@@ -31,6 +31,32 @@ local function addFace(self, color, ...)
    table.insert(self.faces, face)
 end
 
+local function resolve(vertices, indexFace)
+   local face = {}
+   for i, indexVertex in ipairs(indexFace) do
+      face[i] = vertices[indexVertex]
+   end
+   return face
+end
+
+local function addVertexArray(self, vertices, indexFaces)
+   local faces = {}
+   for _, indexFace in ipairs(indexFaces) do
+      local indexVertices = indexFace.vertices
+      local color = indexFace.color
+
+      local faceVertices = resolve(vertices, indexVertices)
+      local normal = geometry.normal(faceVertices)
+      local centroid = geometry.centroid(faceVertices)
+
+      local face = {vertices = indexVertices, normal = normal, centroid = centroid, color = color}
+      table.insert(faces, face)
+   end
+   faces.vertices = vertices
+
+   table.insert(self.vertexArray, faces)
+end
+
 local function addScene(self, scene)
    table.insert(self.scenes, scene)
 end
@@ -44,6 +70,10 @@ local function draw(self, canvas3d)
 
    for _, face in ipairs(self.faces) do
       canvas3d:polygon("fill", face)
+   end
+
+   for _, faces in ipairs(self.vertexArray) do
+      canvas3d:vertexArray(faces)
    end
 
    for _, scene in ipairs(self.scenes) do
@@ -91,12 +121,14 @@ local function new()
    c.lines = {}
    c.faces = {}
    c.scenes = {}
+   c.vertexArray = {}
    c.transformation = transformation.new()
 
    c.draw = draw
    c.addLine = addLine
    c.addFace = addFace
    c.addScene = addScene
+   c.addVertexArray = addVertexArray
    c.translate = translate
    c.rotate = rotate
    c.scale = scale

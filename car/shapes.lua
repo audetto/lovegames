@@ -17,12 +17,18 @@ local function cube(color)
    local a6 = vector.new({-0.5,  0.5, -0.5})
    local a7 = vector.new({-0.5, -0.5, -0.5})
 
-   c:addFace(color, a0, a1, a2, a3)
-   c:addFace(color, a0, a3, a4, a5)
-   c:addFace(color, a0, a5, a6, a1)
-   c:addFace(color, a1, a6, a7, a2)
-   c:addFace(color, a7, a4, a3, a2)
-   c:addFace(color, a4, a7, a6, a5)
+   local vertices = {a0, a1, a2, a3, a4, a5, a6, a7}
+
+   local indexFaces = {
+      {vertices = {1, 2, 3, 4}, color = color},
+      {vertices = {1, 4, 5, 6}, color = color},
+      {vertices = {1, 6, 7, 2}, color = color},
+      {vertices = {2, 7, 8, 3}, color = color},
+      {vertices = {8, 5, 4, 3}, color = color},
+      {vertices = {5, 8, 7, 6}, color = color}
+   }
+
+   c:addVertexArray(vertices, indexFaces)
 
    return c
 end
@@ -35,10 +41,15 @@ local function tetrahedron(color)
    local r2 = vector.new({-1 / 3,   - math.sqrt(2) / 3,   math.sqrt(6) / 3})
    local r3 = vector.new({-1 / 3,   - math.sqrt(2) / 3, - math.sqrt(6) / 3})
 
-   c:addFace(color, r1, r3, r2)
-   c:addFace(color, r0, r2, r3)
-   c:addFace(color, r0, r3, r1)
-   c:addFace(color, r0, r1, r2)
+   local vertices = {r0, r1, r2, r3}
+   local indexFaces = {
+      {vertices = {2, 4, 3}, color = color},
+      {vertices = {1, 3, 4}, color = color},
+      {vertices = {1, 4, 2}, color = color},
+      {vertices = {1, 2, 3}, color = color}
+   }
+
+   c:addVertexArray(vertices, indexFaces)
 
    return c
 end
@@ -53,14 +64,20 @@ local function octahedron(color)
    local r4 = vector.new({ 0, -1,  0})
    local r5 = vector.new({ 0,  0, -1})
 
-   c:addFace(color, r0, r1, r2)
-   c:addFace(color, r0, r5, r1)
-   c:addFace(color, r0, r2, r4)
-   c:addFace(color, r0, r4, r5)
-   c:addFace(color, r3, r2, r1)
-   c:addFace(color, r3, r1, r5)
-   c:addFace(color, r3, r4, r2)
-   c:addFace(color, r3, r5, r4)
+   local vertices = {r0, r1, r2, r3, r4, r5}
+
+   local indexFaces = {
+      {vertices = {1, 2, 3}, color = color},
+      {vertices = {1, 6, 2}, color = color},
+      {vertices = {1, 3, 5}, color = color},
+      {vertices = {1, 5, 6}, color = color},
+      {vertices = {4, 3, 2}, color = color},
+      {vertices = {4, 2, 6}, color = color},
+      {vertices = {4, 5, 3}, color = color},
+      {vertices = {4, 6, 5}, color = color}
+   }
+
+   c:addVertexArray(vertices, indexFaces)
 
    return c
 end
@@ -92,20 +109,29 @@ local function dodecahedron(color)
    local r18 = vector.new({-z,  x,  0})
    local r19 = vector.new({-z, -x,  0})
 
-   c:addFace(color, r00, r01, r02, r03, r04)
-   c:addFace(color, r05, r06, r07, r08, r09)
-   c:addFace(color, r10, r11, r03, r02, r12)
-   c:addFace(color, r13, r14, r08, r07, r15)
+   local vertices = {
+      r00, r01, r02, r03, r04, r05, r06, r07, r08, r09,
+      r10, r11, r12, r13, r14, r15, r16, r17, r18, r19
+   }
 
-   c:addFace(color, r03, r11, r16, r17, r04)
-   c:addFace(color, r02, r01, r18, r19, r12)
-   c:addFace(color, r07, r06, r17, r16, r15)
-   c:addFace(color, r08, r14, r19, r18, r09)
+   local indexFaces = {
+      {vertices = {01, 02, 03, 04, 05}, color = color},
+      {vertices = {06, 07, 08, 09, 10}, color = color},
+      {vertices = {11, 12, 04, 03, 13}, color = color},
+      {vertices = {14, 15, 09, 08, 16}, color = color},
 
-   c:addFace(color, r17, r06, r05, r00, r04)
-   c:addFace(color, r16, r11, r10, r13, r15)
-   c:addFace(color, r18, r01, r00, r05, r09)
-   c:addFace(color, r19, r14, r13, r10, r12)
+      {vertices = {04, 12, 17, 18, 05}, color = color},
+      {vertices = {03, 02, 19, 10, 13}, color = color},
+      {vertices = {08, 07, 18, 17, 16}, color = color},
+      {vertices = {09, 15, 20, 19, 10}, color = color},
+
+      {vertices = {18, 07, 06, 01, 05}, color = color},
+      {vertices = {17, 12, 11, 14, 16}, color = color},
+      {vertices = {19, 02, 01, 06, 10}, color = color},
+      {vertices = {20, 15, 14, 11, 13}, color = color}
+   }
+
+   c:addVertexArray(vertices, indexFaces)
 
    return c
 end
@@ -134,26 +160,35 @@ local function icosahedron(color)
    local r10 = vector.new({-v, -u, -y})
    local r11 = vector.new({-1,  0,  0})
 
-   c:addFace(color, r00, r01, r02)
-   c:addFace(color, r00, r02, r03)
-   c:addFace(color, r00, r03, r04)
-   c:addFace(color, r00, r04, r05)
-   c:addFace(color, r00, r05, r01)
-   c:addFace(color, r01, r08, r02)
-   c:addFace(color, r02, r07, r03)
-   c:addFace(color, r03, r06, r04)
-   c:addFace(color, r04, r10, r05)
-   c:addFace(color, r05, r09, r01)
-   c:addFace(color, r01, r09, r08)
-   c:addFace(color, r02, r08, r07)
-   c:addFace(color, r03, r07, r06)
-   c:addFace(color, r04, r06, r10)
-   c:addFace(color, r05, r10, r09)
-   c:addFace(color, r11, r09, r10)
-   c:addFace(color, r11, r08, r09)
-   c:addFace(color, r11, r07, r08)
-   c:addFace(color, r11, r06, r07)
-   c:addFace(color, r11, r10, r06)
+   local vertices = {r00, r01, r02, r03, r04, r05, r06, r07, r08, r09, r10, r11}
+   local indexFaces = {
+      {vertices = {01, 02, 03}, color = color},
+      {vertices = {01, 03, 04}, color = color},
+      {vertices = {01, 04, 05}, color = color},
+      {vertices = {01, 05, 06}, color = color},
+
+      {vertices = {01, 06, 02}, color = color},
+      {vertices = {02, 09, 03}, color = color},
+      {vertices = {03, 08, 04}, color = color},
+      {vertices = {04, 07, 05}, color = color},
+
+      {vertices = {05, 11, 06}, color = color},
+      {vertices = {06, 10, 02}, color = color},
+      {vertices = {02, 10, 09}, color = color},
+      {vertices = {03, 09, 08}, color = color},
+
+      {vertices = {04, 08, 07}, color = color},
+      {vertices = {05, 07, 11}, color = color},
+      {vertices = {06, 11, 10}, color = color},
+      {vertices = {12, 10, 11}, color = color},
+
+      {vertices = {12, 09, 10}, color = color},
+      {vertices = {12, 08, 09}, color = color},
+      {vertices = {12, 07, 08}, color = color},
+      {vertices = {12, 11, 07}, color = color},
+   }
+
+   c:addVertexArray(vertices, indexFaces)
 
    return c
 end
