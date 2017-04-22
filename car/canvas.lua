@@ -40,7 +40,7 @@ local function vertexLines(self, vertexLines)
 
    local projectedVertices = {}
    for i, vertex in ipairs(vertices) do
-      projectedVertices[i] = { self.perspective:projection(vertex) }
+      projectedVertices[i] = self.perspective:projection(vertex)
    end
 
    for _, line in ipairs(vertexLines) do
@@ -56,8 +56,8 @@ end
 local function line(self, theLine)
    local vertices = theLine.vertices
 
-   local pa = { self.perspective:projection(vertices[1]) }
-   local pb = { self.perspective:projection(vertices[2]) }
+   local pa = self.perspective:projection(vertices[1])
+   local pb = self.perspective:projection(vertices[2])
 
    self:line2(pa, pb, theLine)
 end
@@ -71,7 +71,7 @@ local function vertexArray(self, vertexArray)
 
    local projectedVertices = {}
    for i, vertex in ipairs(vertices) do
-      projectedVertices[i] = { self.perspective:projection(vertex) }
+      projectedVertices[i] = self.perspective:projection(vertex)
    end
 
    for _, face in ipairs(vertexArray) do

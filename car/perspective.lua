@@ -12,7 +12,7 @@ local function projection(self, point)
    srt[1] = srt[1] * self.sign
    srt[2] = srt[2] * self.sign
    local ret = {srt[1] / srt[2], srt[3] / srt[2]}
-   return ret, srt
+   return { ret, srt }
 end
 
 local function limitProjection(res, eps, ahead, behind)
