@@ -16,79 +16,54 @@ local function convert(self, point)
    return x, y
 end
 
-local function line(self, theLine)
-   local vertices = theLine.vertices
-   local pa, pb = self.perspective:line(vertices[1], vertices[2])
+-- a & b have alreday been projected
+local function line2(self, a, b, line)
+   local pa, pb = self.perspective:line(a, b)
 
    if pa and pb then
       local ax, ay = self:convert(pa)
       local bx, by = self:convert(pb)
 
-      local rotatedCentroid = self:transform(theLine.centroid)
+      local rotatedCentroid = self:transform(line.centroid)
 
       local dist = rotatedCentroid:norm()
       table.insert(self.buffer, {dist = dist, action = function ()
-				    love.graphics.setColor(theLine.color)
+				    love.graphics.setColor(line.color)
 				    love.graphics.line(ax, ay, bx, by)
 						       end
       })
    end
 end
 
-local function lines(self, theLines)
-   for _, theLine in ipairs(theLines) do
-      self:line(theLine)
+local function vertexLines(self, vertexLines)
+   local vertices = vertexLines.vertices
+
+   local projectedVertices = {}
+   for i, vertex in ipairs(vertices) do
+      projectedVertices[i] = { self.perspective:projection(vertex) }
    end
+
+   for _, line in ipairs(vertexLines) do
+      local indexVertices = line.vertices
+
+      local a = projectedVertices[indexVertices[1]]
+      local b = projectedVertices[indexVertices[2]]
+
+      self:line2(a, b, line)
+   end
+end
+
+local function line(self, theLine)
+   local vertices = theLine.vertices
+
+   local pa = { self.perspective:projection(vertices[1]) }
+   local pb = { self.perspective:projection(vertices[2]) }
+
+   self:line2(pa, pb, theLine)
 end
 
 local function transform(self, x)
    return matrix.mulmv(self.current, x)
-end
-
-local function polygon(self, mode, face)
-   local vertices = face.vertices
-
-   local rotatedCentroid = self:transform(face.centroid)
-   local rotatedNormal = self:transform(face.normal) -- normal[4] = 0!!!
-
-   -- "-" as centroid is upside down
-   local cos = -vector.cosangle(rotatedCentroid, rotatedNormal)
-
-   if cos < self.cosThreshold then
-      -- we cannot see the face
-      return
-   end
-
-   local points = {}
-   local n = #vertices
-   local prev = vertices[n]
-
-   for i = 1, n do
-      local current = vertices[i]
-      local pa, pb, orga, _ = self.perspective:line(prev, current)
-
-      if pa and pb then
-	 if not orga then
-	    -- the a point has been modified
-	    -- so it wont match the b point of the previous side
-	    -- => we must insert it now
-	    self:addPoint(points, pa)
-	 end
-
-	 -- b point is always inserted
-	 self:addPoint(points, pb)
-      end
-      prev = current
-   end
-
-   if #points > 4 then
-      local dist = rotatedCentroid:norm()
-      table.insert(self.buffer, {dist = dist, action = function ()
-				    love.graphics.setColor(face.color[1] * cos, face.color[2] * cos, face.color[3] * cos)
-				    love.graphics.polygon(mode, points)
-						       end
-      })
-   end
 end
 
 local function vertexArray(self, vertexArray)
@@ -96,8 +71,7 @@ local function vertexArray(self, vertexArray)
 
    local projectedVertices = {}
    for i, vertex in ipairs(vertices) do
-      local p, r = self.perspective:projection(vertex)
-      projectedVertices[i] = {p, r}
+      projectedVertices[i] = { self.perspective:projection(vertex) }
    end
 
    for _, face in ipairs(vertexArray) do
@@ -117,7 +91,7 @@ local function vertexArray(self, vertexArray)
 	 for i = 1, n do
 	    local current = projectedVertices[indexVertices[i]]
 
-	    local pa, pb, orga, _ = self.perspective:line2(prev, current)
+	    local pa, pb, orga, _ = self.perspective:line(prev, current)
 
 	    if pa and pb then
 	       if not orga then
@@ -181,10 +155,10 @@ local function new(perspective, scale)
 
    c.perspective = perspective
    c.convert = convert
+   c.line2 = line2
    c.line = line
-   c.lines = lines
-   c.polygon = polygon
    c.vertexArray = vertexArray
+   c.vertexLines = vertexLines
    c.addPoint = addPoint
    c.transform = transform
    c.draw = draw

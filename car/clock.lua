@@ -18,22 +18,18 @@ local function createLine(self, color, angle, ratio)
 end
 
 local function draw(self, canvas)
-   canvas:lines(self.lines)
-
-   local lines = {}
+   self.border:draw(canvas)
 
    local a = os.date("*t")
 
    local angle_seconds = a.sec / 60
-   table.insert(lines, self:createLine(colors.lime, angle_seconds, 0.9))
+   canvas:line(self:createLine(colors.lime, angle_seconds, 0.9))
 
    local angle_minutes = (a.min + angle_seconds) / 60
-   table.insert(lines, self:createLine(colors.blue, angle_minutes, 0.8))
+   canvas:line(self:createLine(colors.blue, angle_minutes, 0.8))
 
    local angle_hours = ((a.hour + 12) + angle_minutes) / 12
-   table.insert(lines, self:createLine(colors.red, angle_hours, 0.5))
-
-   canvas:lines(lines)
+   canvas:line(self:createLine(colors.red, angle_hours, 0.5))
 end
 
 function M.new(position, size)
@@ -44,8 +40,10 @@ function M.new(position, size)
    p.size = size
    p.draw = draw
    p.createLine = createLine
+   p.border = scene:new()
 
-   local border = {}
+   local vertices = {}
+   local indexLines = {}
 
    for i = 1, p.steps do
       local rad = math.pi * 2 / p.steps * i
@@ -54,16 +52,13 @@ function M.new(position, size)
 
       local b = vector.new({p.position[1] + x, p.position[2], p.position[3] + z})
 
-      table.insert(border, b)
-   end
-   table.insert(border, border[1])
+      table.insert(vertices, b)
 
-   p.lines = {}
-
-   for i = 1, p.steps do
-      local line = scene.newLine(colors.olive, border[i], border[i + 1])
-      table.insert(p.lines, line)
+      local prev = (i == 1) and p.steps or (i - 1)
+      table.insert(indexLines, {vertices = {prev, i}, color = colors.olive})
    end
+
+   p.border:addVertexLines(vertices, indexLines)
 
    return p
 end

@@ -18,11 +18,18 @@ local function viewfinder(color, dist)
 
    local a1 = vector.new({-size, dist, 0})
    local b1 = vector.new({size, dist, 0})
-   points:addLine(color, a1, b1)
 
    local a2 = vector.new({0, dist, size})
    local b2 = vector.new({0, dist, -size})
-   points:addLine(color, a2, b2)
+
+   local vertices = {a1, b1, a2, b2}
+
+   local indexLines = {
+      {vertices = {1, 2}, color = color},
+      {vertices = {3, 4}, color = color}
+   }
+
+   points:addVertexLines(vertices, indexLines)
 
    return points
 end
@@ -30,27 +37,33 @@ end
 local function boundaries(p1, p2)
    local points = scene.new()
 
-   love.graphics.setColor(colors.gray)
-
    local inf = 100
 
    local a4_inf = vector.new({p1[1], inf, p1[3]})
    local a4 = vector.new({p1[1], p2[2], p1[3]})
-   points:addLine(colors.gray, a4, a4_inf)
 
    local a3_inf = vector.new({p2[1], inf, p1[3]})
    local a3 = vector.new({p2[1], p2[2], p1[3]})
-   points:addLine(colors.gray, a3, a3_inf)
 
    local left_most_ahead = vector.new({-inf, inf, 0})
    local right_most_ahead = vector.new({inf, inf, 0})
    local left_most_behind = vector.new({-inf, -inf, 0})
    local right_most_behind = vector.new({inf, -inf, 0})
 
-   points:addLine(colors.magenta, left_most_ahead, right_most_ahead)
-   points:addLine(colors.gray, right_most_ahead, right_most_behind)
-   points:addLine(colors.gray, right_most_behind, left_most_behind)
-   points:addLine(colors.gray, left_most_behind, left_most_ahead)
+   local vertices = {a4_inf, a4, a3_inf, a3,
+		     left_most_ahead, right_most_ahead,
+		     right_most_behind, left_most_behind}
+
+   local indexLines = {
+      {vertices = {1, 2}, color = colors.gray},
+      {vertices = {3, 4}, color = colors.gray},
+      {vertices = {5, 6}, color = colors.magenta},
+      {vertices = {6, 7}, color = colors.gray},
+      {vertices = {7, 8}, color = colors.gray},
+      {vertices = {8, 5}, color = colors.gray}
+   }
+
+   points:addVertexLines(vertices, indexLines)
 
    return points
 end
