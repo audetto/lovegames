@@ -121,7 +121,7 @@ local function dodecahedron(color)
       {vertices = {14, 15, 09, 08, 16}, color = color},
 
       {vertices = {04, 12, 17, 18, 05}, color = color},
-      {vertices = {03, 02, 19, 10, 13}, color = color},
+      {vertices = {03, 02, 19, 20, 13}, color = color},
       {vertices = {08, 07, 18, 17, 16}, color = color},
       {vertices = {09, 15, 20, 19, 10}, color = color},
 
