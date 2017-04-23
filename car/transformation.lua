@@ -45,12 +45,12 @@ local function transform(self, x)
    return matrix.mulmv(self.rotation, x)
 end
 
-local function new()
+local function new(rot)
    local p = {}
 
    setmetatable(p, mt)
 
-   p.rotation = matrix.id()
+   p.rotation = rot or matrix.id()
 
    p.getY = getY
    p.rotate = rotate
@@ -62,10 +62,16 @@ local function new()
    return p
 end
 
+local function inverse(self)
+   local rot = matrix.inverse(self.rotation)
+   return new(rot)
+end
+
 M.x = vector.new({1, 0, 0})
 M.y = vector.new({0, 1, 0})
 M.z = vector.new({0, 0, 1})
 
 M.new = new
+M.inverse = inverse
 
 return M

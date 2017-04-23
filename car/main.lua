@@ -3,7 +3,6 @@ local shapes = require("shapes")
 local canvas = require("canvas")
 local transformation = require("transformation")
 local vector = require("vector")
-local matrix = require("matrix")
 local clock = require("clock")
 local colors = require("colors")
 local scene = require("scene")
@@ -165,7 +164,7 @@ function love.draw()
    car.static:draw(car.cnv3d)
 
    -- from camera to the center of the world
-   car.cnv3d:push(matrix.inverse(car.camera.rotation))
+   car.cnv3d:push(transformation.inverse(car.camera))
 
    car.world:draw(car.cnv3d)
    car.clock:draw(car.cnv3d)

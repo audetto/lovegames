@@ -1,5 +1,4 @@
 local vector = require("vector")
-local matrix = require("matrix")
 local geometry = require("geometry")
 local transformation = require("transformation")
 
@@ -66,7 +65,7 @@ local function addScene(self, scene)
 end
 
 local function draw(self, canvas3d)
-   canvas3d:push(self.transformation.rotation)
+   canvas3d:push(self.transformation)
 
    for _, lines in ipairs(self.vertexLines) do
       canvas3d:vertexLines(lines)

@@ -1,14 +1,13 @@
 local vector = require("vector")
-local matrix = require("matrix")
 
 local M = {}
 
-local function setCamera(self, rotation)
-   self.rotation = rotation
+local function setCamera(self, transformation)
+   self.transformation = transformation
 end
 
 local function projection(self, point)
-   local srt = matrix.mulmv(self.rotation, point)
+   local srt = self.transformation:transform(point)
    srt[1] = srt[1] * self.sign
    srt[2] = srt[2] * self.sign
    local ret = {srt[1] / srt[2], srt[3] / srt[2]}

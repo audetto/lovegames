@@ -1,5 +1,5 @@
 local vector = require("vector")
-local matrix = require("matrix")
+local transformation = require("transformation")
 
 local M = {}
 
@@ -24,7 +24,7 @@ local function line2(self, a, b, line)
       local ax, ay = self:convert(pa)
       local bx, by = self:convert(pb)
 
-      local rotatedCentroid = self:transform(line.centroid)
+      local rotatedCentroid = self.current:transform(line.centroid)
 
       local dist = rotatedCentroid:norm()
       table.insert(self.buffer, {dist = dist, action = function ()
@@ -62,10 +62,6 @@ local function line(self, theLine)
    self:line2(pa, pb, theLine)
 end
 
-local function transform(self, x)
-   return matrix.mulmv(self.current, x)
-end
-
 local function vertexArray(self, vertexArray)
    local vertices = vertexArray.vertices
 
@@ -75,8 +71,8 @@ local function vertexArray(self, vertexArray)
    end
 
    for _, face in ipairs(vertexArray) do
-      local rotatedCentroid = self:transform(face.centroid)
-      local rotatedNormal = self:transform(face.normal) -- normal[4] = 0!!!
+      local rotatedCentroid = self.current:transform(face.centroid)
+      local rotatedNormal = self.current:transform(face.normal) -- normal[4] = 0!!!
 
       -- "-" as centroid is upside down
       local cos = -vector.cosangle(rotatedCentroid, rotatedNormal)
@@ -133,9 +129,14 @@ local function draw(self)
    self.buffer = {}
 end
 
-local function push(self, mat)
+local function push(self, trans)
    local last = #self.matrices
-   self.current = matrix.mulmm(self.matrices[last], mat)
+
+   -- shllow copy
+   self.current = transformation.new(self.current.rotation)
+   -- this will make it into a deep copy
+   self.current:generic(trans.rotation)
+
    self.perspective:setCamera(self.current)
    self.matrices[last + 1] = self.current
 end
@@ -151,7 +152,9 @@ local function new(perspective, scale)
 
    c.buffer = {}
    c.cosThreshold = 0.01
-   c.matrices = { matrix.id() }
+   c.current = transformation.new()
+   c.matrices = { c.current }
+
 
    c.perspective = perspective
    c.convert = convert
@@ -160,7 +163,6 @@ local function new(perspective, scale)
    c.vertexArray = vertexArray
    c.vertexLines = vertexLines
    c.addPoint = addPoint
-   c.transform = transform
    c.draw = draw
    c.push = push
    c.pop = pop
