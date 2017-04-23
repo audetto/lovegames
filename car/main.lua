@@ -1,3 +1,6 @@
+-- missing strict is not an error
+pcall(function() require("strict") end)
+
 local perspective = require("perspective")
 local shapes = require("shapes")
 local canvas = require("canvas")
@@ -6,9 +9,6 @@ local vector = require("vector")
 local clock = require("clock")
 local colors = require("colors")
 local scene = require("scene")
-
--- missing strict is not an error
-pcall(function() require("strict") end)
 
 local function viewfinder(color, dist)
    local points = scene.new()
@@ -164,7 +164,7 @@ function love.draw()
    car.static:draw(car.cnv3d)
 
    -- from camera to the center of the world
-   car.cnv3d:push(transformation.inverse(car.camera))
+   car.cnv3d:push(car.camera:inverse())
 
    car.world:draw(car.cnv3d)
    car.clock:draw(car.cnv3d)
@@ -181,7 +181,7 @@ function love.draw()
    love.graphics.print("Position: " .. tostring(position), 400, 500)
    love.graphics.print("Direction: " .. tostring(direction), 400, 515)
    love.graphics.print("Norm: " .. direction:norm(), 400, 530)
-   local angle = direction:angle(car.north) / (math.pi * 2) * 360
+   local angle = vector.angle(direction, car.north) / (math.pi * 2) * 360
    love.graphics.print(string.format("North: %6.1f", angle), 400, 545)
    love.graphics.print("FPS: " .. love.timer.getFPS(), 400, 560)
 end

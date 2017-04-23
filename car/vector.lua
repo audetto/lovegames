@@ -32,8 +32,8 @@ end
 
 local function cosangle(self, b)
    local d = dot3(self, b)
-   local na = norm(self)
-   local nb = norm(b)
+   local na = self:norm()
+   local nb = b:norm()
 
    local ac = d / (na * nb)
    return ac
@@ -62,9 +62,7 @@ local mt = {__tostring = toString}
 local function new(x)
    setmetatable(x, mt)
    x.norm = norm
-   x.dot = dot
-   x.dot3 = dot3
-   x.angle = angle
+
    x[4] = x[4] or 1
    return x
 end
@@ -75,13 +73,12 @@ local function empty()
 end
 
 M.toString = toString
+
 M.angle = angle
 M.cosangle = cosangle
 M.norm = norm
 M.add = add
-M.scale = scale
 M.new = new
-M.direction = direction
 M.empty = empty
 M.dot = dot
 M.cross = cross

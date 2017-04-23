@@ -58,38 +58,25 @@ local function column(self, i)
    return col
 end
 
-local function new(x)
-   setmetatable(x, mt)
-
-   x[1] = vector.new(x[1])
-   x[2] = vector.new(x[2])
-   x[3] = vector.new(x[3])
-   x[4] = vector.new(x[4])
-
-   x.column = column
-
-   return x
-end
-
 local function empty()
    local x = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 1}}
-   return new(x)
+   return M.new(x)
 end
 
 local function diag(d)
    local x = {{d[1], 0, 0, 0}, {0, d[2], 0, 0}, {0, 0, d[3], 0}, {0, 0, 0, 1}}
-   return new(x)
+   return M.new(x)
 end
 
 local function id()
    local x = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}
-   return new(x)
+   return M.new(x)
 end
 
 local function inverse(self)
    -- only correct if this is a real ROTATION
    -- i.e. not scaling
-   local t = new({
+   local t = M.new({
 	 {self[1][1], self[2][1], self[3][1], 0},
 	 {self[1][2], self[2][2], self[3][2], 0},
 	 {self[1][3], self[2][3], self[3][3], 0},
@@ -109,7 +96,7 @@ end
 local function rotation(a, angle)
    local c = math.cos(angle)
    local s = math.sin(angle)
-   local rot = new({
+   local rot = M.new({
 	 {c + a[1] * a[1] * (1 - c), a[1] * a[2] * (1 - c) - a[3] * s, a[1] * a[3] * (1 - c) + a[2] * s, 0},
 	 {a[2] * a[1] * (1 - c) + a[3] * s, c + a[2] * a[2] * (1 - c), a[2] * a[3] * (1 - c) - a[1] * s, 0},
 	 {a[3] * a[1] * (1 - c) - a[2] * s, a[3] * a[2] * (1 - c) + a[1] * s, c + a[3] * a[3] * (1 - c), 0},
@@ -119,13 +106,27 @@ local function rotation(a, angle)
 end
 
 local function translation(a, coeff)
-   local trans = new({
+   local trans = M.new({
 	 {1, 0, 0, coeff * a[1]},
 	 {0, 1, 0, coeff * a[2]},
 	 {0, 0, 1, coeff * a[3]},
 	 {0, 0, 0, 1}
    })
    return trans
+end
+
+local function new(x)
+   setmetatable(x, mt)
+
+   x[1] = vector.new(x[1])
+   x[2] = vector.new(x[2])
+   x[3] = vector.new(x[3])
+   x[4] = vector.new(x[4])
+
+   x.column = column
+   x.inverse = inverse
+
+   return x
 end
 
 M.toString = toString
@@ -137,6 +138,5 @@ M.rotation = rotation
 M.translation = translation
 M.mulmv = mulmv
 M.mulmm = mulmm
-M.inverse = inverse
 
 return M

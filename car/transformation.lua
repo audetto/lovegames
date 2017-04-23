@@ -45,6 +45,11 @@ local function transform(self, x)
    return matrix.mulmv(self.rotation, x)
 end
 
+local function inverse(self)
+   local rot = self.rotation:inverse()
+   return M.new(rot)
+end
+
 local function new(rot)
    local p = {}
 
@@ -58,13 +63,9 @@ local function new(rot)
    p.scale = scale
    p.generic = generic
    p.transform = transform
+   p.inverse = inverse
 
    return p
-end
-
-local function inverse(self)
-   local rot = matrix.inverse(self.rotation)
-   return new(rot)
 end
 
 M.x = vector.new({1, 0, 0})
@@ -72,6 +73,5 @@ M.y = vector.new({0, 1, 0})
 M.z = vector.new({0, 0, 1})
 
 M.new = new
-M.inverse = inverse
 
 return M
