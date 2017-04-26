@@ -30,25 +30,23 @@ end
 function mt.__pow(self, t)
    local omega, l, d2, m = self:split()
 
-   local powOmega = omega * t
-   local powD2 = d2 * t
+   if omega == nil then
+      local qr = self[1] ^ t
+      local qd = self[2] * t
 
-   local coeff
-   if omega == 0 then
-      -- Taylor expansion would be
-      -- coeff = t + (t - t ^ 3) / 6 * omega ^ 2
-      coeff = t
+      return M.new(qr, qd)
    else
-      coeff = math.sin(powOmega) / math.sin(omega)
+      local powOmega = omega * t
+      local powD2 = d2 * t
+
+      local c = math.cos(powOmega)
+      local s = math.sin(powOmega)
+
+      local qr = quaternion.new(c, s * l[1], s * l[2], s * l[3])
+      local qd = quaternion.new(-powD2 * s, powD2 * c * l[1] + s * m[1], powD2 * c * l[2] + s * m[2], powD2 * c * l[3] + s * m[3])
+
+      return M.new(qr, qd)
    end
-
-   local c = math.cos(powOmega)
-   local s = math.sin(powOmega)
-
-   local qr = quaternion.new(c, s * l[1], s * l[2], s * l[3])
-   local qd = quaternion.new(-powD2 * s, powD2 * c * l[1] + s * m[1], powD2 * c * l[2] + s * m[2], powD2 * c * l[3] + s * m[3])
-
-   return M.new(qr, qd)
 end
 
 local function conj(self)
@@ -66,6 +64,9 @@ local function split(self)
 
    local c = qr[1]
    local omega = math.acos(c)
+   if omega == 0 then
+      return
+   end
 
    local s = math.sin(omega)
    local l = {qr[2] / s, qr[3] / s, qr[4] / s}
