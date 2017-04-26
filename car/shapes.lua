@@ -36,17 +36,17 @@ end
 local function tetrahedron(color)
    local c = scene.new()
 
-   local r0 = vector.new({     1,                    0,                  0})
-   local r1 = vector.new({-1 / 3, 2 * math.sqrt(2) / 3,                  0})
-   local r2 = vector.new({-1 / 3,   - math.sqrt(2) / 3,   math.sqrt(6) / 3})
-   local r3 = vector.new({-1 / 3,   - math.sqrt(2) / 3, - math.sqrt(6) / 3})
+   local r0 = vector.new({                  0,                    0,      1})
+   local r1 = vector.new({                  0, 2 * math.sqrt(2) / 3, -1 / 3})
+   local r2 = vector.new({   math.sqrt(6) / 3,   - math.sqrt(2) / 3, -1 / 3})
+   local r3 = vector.new({ - math.sqrt(6) / 3,   - math.sqrt(2) / 3, -1 / 3})
 
    local vertices = {r0, r1, r2, r3}
    local indexFaces = {
-      {vertices = {2, 4, 3}, color = color},
-      {vertices = {1, 3, 4}, color = color},
-      {vertices = {1, 4, 2}, color = color},
-      {vertices = {1, 2, 3}, color = color}
+      {vertices = {2, 3, 4}, color = color},
+      {vertices = {1, 4, 3}, color = color},
+      {vertices = {1, 2, 4}, color = color},
+      {vertices = {1, 3, 2}, color = color}
    }
 
    c:addVertexArray(vertices, indexFaces)
