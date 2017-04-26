@@ -95,11 +95,6 @@ local function scale(self, ...)
 end
 
 local function apply(self)
-   for _, line in ipairs(self.lines) do
-      transformVertices(line.vertices, self.transformation)
-      line.centroid = geometry.centroid(line.vertices)
-   end
-
    for _, faces in ipairs(self.vertexArray) do
       local vertices = faces.vertices
       transformVertices(vertices, self.transformation)
@@ -141,7 +136,6 @@ end
 local function new()
    local c = {}
 
-   c.lines = {}
    c.scenes = {}
    c.vertexArray = {}
    c.vertexLines = {}
