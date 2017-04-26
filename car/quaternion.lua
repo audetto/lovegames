@@ -39,7 +39,7 @@ function mt.__pow(self, t)
       coeff = math.sin(powOmega) / math.sin(omega)
    end
 
-   local c = math.cos(newOmega)
+   local c = math.cos(powOmega)
    return M.new(c, self[2] * coeff, self[3] * coeff, self[4] * coeff)
 end
 
