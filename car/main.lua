@@ -10,6 +10,8 @@ local clock = require("clock")
 local colors = require("colors")
 local scene = require("scene")
 
+local car
+
 local function viewfinder(color, dist)
    local points = scene.new()
 
@@ -67,6 +69,28 @@ local function boundaries(p1, p2)
    return points
 end
 
+local function player()
+   local p = scene.new()
+
+   local c = shapes.cube(colors.red)
+   c:scale({2, 3, 1})
+   c:apply()
+   p:addScene(c)
+
+   local t = shapes.tetrahedron(colors.blue)
+   t:scale({1, 3, 1})
+   t:apply()
+   t:translate(transformation.z, 0.5 + 1 / 3)
+   p:addScene(t)
+
+   p:translate(transformation.y, 8)
+   p:translate(transformation.z, -5)
+
+   p:apply()
+
+   return p
+end
+
 local function init()
    local car = {}
 
@@ -80,7 +104,7 @@ local function init()
 
    car.cnv3d = canvas.new(car.P, 500)
 
-   car.static = scene:new()
+   car.static = scene.new()
    local viewfinder1 = viewfinder(colors.red, 1) -- ahead
    car.static:addScene(viewfinder1)
 
@@ -88,6 +112,9 @@ local function init()
    car.static:addScene(viewfinder2)
 
    car.world = scene.new()
+
+   car.player = player()
+   car.world:addScene(car.player)
 
    local c1 = shapes.cube(colors.yellow)
    c1:translate(vector.new({3.5, 4.5, 1.5}), 1)
@@ -154,7 +181,9 @@ local function init()
    return car
 end
 
-local car = init()
+function love.load()
+   car = init()
+end
 
 function love.draw()
    car.P.sign = car.dir_sign
@@ -202,6 +231,8 @@ function love.update(dt)
 
    -- move along local y
    car.camera:translate(transformation.y, dt * car.coeff * car.speed)
+
+   car.player.transformation = car.camera
 end
 
 function love.gamepadaxis(joystick, axis, value)
