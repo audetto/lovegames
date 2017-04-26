@@ -27,11 +27,6 @@ local function rotate(self, a, angle)
    self:internal(rot)
 end
 
-local function scale(self, s)
-   local rot = matrix.diag(s)
-   self:internal(rot)
-end
-
 local function internal(self, m)
    -- postmultiply to rotate around local axes
    self.rotation = matrix.mulmm(self.rotation, m)
@@ -73,7 +68,6 @@ local function new(rot)
    p.getPos = getPos
    p.rotate = rotate
    p.translate = translate
-   p.scale = scale
    p.generic = generic
    p.internal = internal
    p.transform = transform

@@ -1,6 +1,7 @@
 local vector = require("vector")
 local geometry = require("geometry")
 local transformation = require("transformation")
+local matrix = require("matrix")
 
 local M = {}
 
@@ -90,8 +91,21 @@ local function rotate(self, ...)
    self.transformation:rotate(...)
 end
 
+-- this is not a rigid body transformation
+-- and it is applied directly to the vertices before the current transformation
+-- so we create a minimalistic scaling transformation
+-- replace the current one
+-- apply it
+-- then restore the original one
 local function scale(self, ...)
-   self.transformation:scale(...)
+   local current = self.transformation
+
+   self.transformation = matrix.diag(...)
+   self.transformation.transform = matrix.mulmv
+
+   self:apply()
+
+   self.transformation = current
 end
 
 local function apply(self)

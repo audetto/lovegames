@@ -74,12 +74,10 @@ local function player()
 
    local c = shapes.cube(colors.red)
    c:scale({2, 3, 1})
-   c:apply()
    p:addScene(c)
 
    local t = shapes.tetrahedron(colors.blue)
    t:scale({1, 3, 1})
-   t:apply()
    t:translate(transformation.z, 0.5 + 1 / 3)
    p:addScene(t)
 
