@@ -131,7 +131,7 @@ local function apply(self)
    end
 
    for _, scene in ipairs(self.scenes) do
-      scene.transformation:generic(self.transformation.rotation)
+      scene.transformation:generic(self.transformation)
    end
 
    -- reset

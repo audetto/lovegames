@@ -15,7 +15,7 @@ local function translate(self, direction, coeff)
    end
 
    local rot = matrix.translation(direction, coeff)
-   self:generic(rot)
+   self:internal(rot)
 end
 
 local function rotate(self, a, angle)
@@ -24,21 +24,29 @@ local function rotate(self, a, angle)
    end
 
    local rot = matrix.rotation(a, angle)
-   self:generic(rot)
+   self:internal(rot)
 end
 
 local function scale(self, s)
    local rot = matrix.diag(s)
-   self:generic(rot)
+   self:internal(rot)
 end
 
-local function generic(self, m)
+local function internal(self, m)
    -- postmultiply to rotate around local axes
    self.rotation = matrix.mulmm(self.rotation, m)
 end
 
+local function generic(self, t)
+   self:internal(t.rotation)
+end
+
 local function getY(self)
    return self.rotation:column(2)
+end
+
+local function getPos(self)
+   return self.rotation:column(4)
 end
 
 local function transform(self, x)
@@ -50,6 +58,10 @@ local function inverse(self)
    return M.new(rot)
 end
 
+local function clone(self)
+   return M.new(self.rotation)
+end
+
 local function new(rot)
    local p = {}
 
@@ -58,12 +70,15 @@ local function new(rot)
    p.rotation = rot or matrix.id()
 
    p.getY = getY
+   p.getPos = getPos
    p.rotate = rotate
    p.translate = translate
    p.scale = scale
    p.generic = generic
+   p.internal = internal
    p.transform = transform
    p.inverse = inverse
+   p.clone = clone
 
    return p
 end

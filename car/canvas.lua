@@ -133,9 +133,9 @@ local function push(self, trans)
    local last = #self.matrices
 
    -- shllow copy
-   self.current = transformation.new(self.current.rotation)
+   self.current = self.current:clone()
    -- this will make it into a deep copy
-   self.current:generic(trans.rotation)
+   self.current:generic(trans)
 
    self.perspective:setCamera(self.current)
    self.matrices[last + 1] = self.current

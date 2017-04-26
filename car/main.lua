@@ -204,7 +204,7 @@ function love.draw()
 
    love.graphics.setColor(colors.white)
 
-   local position = car.camera.rotation:column(4)
+   local position = car.camera:getPos()
    local direction = car.camera:getY()
 
    love.graphics.print("Position: " .. tostring(position), 400, 500)
