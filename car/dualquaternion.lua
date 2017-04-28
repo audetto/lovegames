@@ -28,8 +28,13 @@ function mt.__div(self, rhs)
    return M.new(self[1] / rhs, self[2] / rhs)
 end
 
+-- pow does not work for
+-- p1 = d.new(q.one * 9, -q.one * 8)
+-- p2 = d.new(q.one * 9, -q.one * 8)
+-- p2[1][2] = 0.1
+
 function mt.__pow(self, t)
-   local omega, l, d2, m = self:split()
+   local omega, l, d2, m, alpha2 = self:split()
 
    if omega == nil then
       local qr = self[1] ^ t
@@ -39,9 +44,10 @@ function mt.__pow(self, t)
    else
       local powOmega = omega * t
       local powD2 = d2 * t
+      local powAlpha = alpha2 ^ (t / 2)
 
-      local c = math.cos(powOmega)
-      local s = math.sin(powOmega)
+      local c = powAlpha * math.cos(powOmega)
+      local s = powAlpha * math.sin(powOmega)
 
       local qr = quaternion.new(c, s * l[1], s * l[2], s * l[3])
       local qd = quaternion.new(-powD2 * s, powD2 * c * l[1] + s * m[1], powD2 * c * l[2] + s * m[2], powD2 * c * l[3] + s * m[3])
@@ -67,20 +73,29 @@ local function split(self)
    local qr = self[1]
    local qd = self[2]
 
-   local c = qr[1]
-   local omega = math.acos(c)
-   if omega == 0 then
+   local alphaSin2 = qr[2] * qr[2] + qr[3] * qr[3] + qr[4] * qr[4]
+
+   if alphaSin2 == 0 then
       return
    end
 
-   local s = math.sin(omega)
-   local l = {qr[2] / s, qr[3] / s, qr[4] / s}
+   local alphaCos = qr[1]
+   local alpha2 = alphaCos * alphaCos + alphaSin2
 
-   local d2 = -qd[1] / s
+   local alphaSin = math.sqrt(alphaSin2)
 
-   local m = {(qd[2] - d2 * c * l[1]) / s, (qd[3] - d2 * c * l[2]) / s, (qd[4] - d2 * c * l[3]) / s}
+   local omega = math.atan2(alphaSin, alphaCos) -- omega = theta / 2
 
-   return omega, l, d2, m
+   local l = {qr[2] / alphaSin, qr[3] / alphaSin, qr[4] / alphaSin}
+
+   local d2 = -qd[1] / alphaSin
+
+   local coeff = alphaCos * qd[1] / alphaSin2
+   local m = {qd[2] / alphaSin + l[1] * coeff,
+	      qd[3] / alphaSin + l[2] * coeff,
+	      qd[4] / alphaSin + l[3] * coeff}
+
+   return omega, l, d2, m, alpha2
 end
 
 local function transform(self, x)

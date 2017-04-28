@@ -29,20 +29,25 @@ function mt.__div(self, rhs)
 end
 
 function mt.__pow(self, t)
-   local omega = math.acos(self[1]) -- omega = theta / 2
-   local powOmega = omega * t
+   local alphaCos = self[1]
+   local alphaSin2 = self[2] * self[2] + self[3] * self[3] + self[4] * self[4]
 
-   local coeff
-   if omega == 0 then
-      -- Taylor expansion would be
-      -- coeff = t + (t - t ^ 3) / 6 * omega ^ 2
-      coeff = t
+   if alphaSin2 == 0 then
+      -- this is just a real number
+      return M.new(alphaCos ^ t, 0, 0, 0)
    else
-      coeff = math.sin(powOmega) / math.sin(omega)
-   end
+      local alphaSin = math.sqrt(alphaSin2)
+      local omega = math.atan2(alphaSin, alphaCos) -- omega = theta / 2
 
-   local c = math.cos(powOmega)
-   return M.new(c, self[2] * coeff, self[3] * coeff, self[4] * coeff)
+      local alpha2 = alphaCos * alphaCos + alphaSin2
+      local powOmega = omega * t
+      local powAlpha = alpha2 ^ (t / 2)
+
+      local coeff = powAlpha * math.sin(powOmega) / alphaSin
+
+      local powAlphaCos = powAlpha * math.cos(powOmega)
+      return M.new(powAlphaCos, self[2] * coeff, self[3] * coeff, self[4] * coeff)
+   end
 end
 
 local function mul(self, rhs)
