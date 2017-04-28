@@ -1,4 +1,5 @@
 local quaternion = require("quaternion")
+local vector = require("vector")
 
 local M = {}
 
@@ -53,6 +54,10 @@ local function conj(self)
    return M.new(self[1]:conj(), self[2]:conj())
 end
 
+local function conj3(self)
+   return M.new(self[1]:conj(), -self[2]:conj())
+end
+
 local function norm(self)
    local a = self * self:conj()
    return math.sqrt(a[1][1])
@@ -78,20 +83,37 @@ local function split(self)
    return omega, l, d2, m
 end
 
+local function transform(self, x)
+   if x[4] == 0 then
+      return self[1]:transform(x)
+   else
+      local qr = quaternion.one
+      local qd = quaternion.fromTranslation(x, 1)
+      local d = M.new(qr, qd)
+
+      local dres = self * d * self:conj3()
+
+      local res = vector.new({dres[2][2], dres[2][3], dres[2][4], x[4]})
+      return res
+   end
+end
+
 local function fromRT(r, t)
-   local qr = r
-   local qd = t * r * 0.5
+   local qr = r or quaternion.one
+   local qd = (t and (t * qr * 0.5)) or quaternion.zero
 
    return M.new(qr, qd)
 end
 
 local function new(qr, qd)
-   local d = {qr, qd}
+   local d = {qr or quaternion.one, qd or quaternion.zero}
    setmetatable(d, mt)
 
    d.norm = norm
    d.conj = conj
+   d.conj3 = conj3
    d.split = split
+   d.transform = transform
 
    return d
 end
