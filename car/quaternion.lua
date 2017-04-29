@@ -16,6 +16,10 @@ function mt.__add(self, rhs)
    return M.new(self[1] + rhs[1], self[2] + rhs[2], self[3] + rhs[3], self[4] + rhs[4])
 end
 
+function mt.__sub(self, rhs)
+   return M.new(self[1] - rhs[1], self[2] - rhs[2], self[3] - rhs[3], self[4] - rhs[4])
+end
+
 function mt.__mul(self, rhs)
    if type(rhs) == "number" then
       return M.new(self[1] * rhs, self[2] * rhs, self[3] * rhs, self[4] * rhs)
