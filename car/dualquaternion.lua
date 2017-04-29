@@ -32,17 +32,19 @@ function mt.__div(self, rhs)
    return M.new(self[1] / rhs, self[2] / rhs)
 end
 
--- pow does not work for
--- p1 = d.new(q.one * 9, -q.one * 8)
--- p2 = d.new(q.one * 9, -q.one * 8)
--- p2[1][2] = 0.1
-
 function mt.__pow(self, t)
-   local omega, l, d2, m, alpha2 = self:split()
+   -- does work as well even if it is not a unit
+   local alpha2, excess, omega, l, d2, m = self:split()
 
-   if omega == nil then
+   if omega == 0 then
       local qr = self[1] ^ t
       local qd = self[2] * t
+      local coeff = (excess / alpha2) * t
+
+      qd[1] = qd[1] + coeff * (qr[1] - self[1][1])
+      qd[2] = qd[2] + coeff * (qr[2] - self[1][2])
+      qd[3] = qd[3] + coeff * (qr[3] - self[1][3])
+      qd[4] = qd[4] + coeff * (qr[4] - self[1][4])
 
       return M.new(qr, qd)
    else
@@ -53,8 +55,15 @@ function mt.__pow(self, t)
       local c = powAlpha * math.cos(powOmega)
       local s = powAlpha * math.sin(powOmega)
 
+      local coeff = (excess / alpha2) * t
+
       local qr = quaternion.new(c, s * l[1], s * l[2], s * l[3])
-      local qd = quaternion.new(-powD2 * s, powD2 * c * l[1] + s * m[1], powD2 * c * l[2] + s * m[2], powD2 * c * l[3] + s * m[3])
+      local qd = quaternion.new(
+	    -powD2 * s + qr[1] * coeff,
+	 powD2 * c * l[1] + s * m[1] + qr[2] * coeff,
+	 powD2 * c * l[2] + s * m[2] + qr[3] * coeff,
+	 powD2 * c * l[3] + s * m[3] + qr[4] * coeff)
+      print(qr[2] * coeff)
 
       return M.new(qr, qd)
    end
@@ -78,13 +87,13 @@ local function split(self)
    local qd = self[2]
 
    local alphaSin2 = qr[2] * qr[2] + qr[3] * qr[3] + qr[4] * qr[4]
-
-   if alphaSin2 == 0 then
-      return
-   end
-
+   local excess = qr[1] * qd[1] + qr[2] * qd[2] + qr[3] * qd[3] + qr[4] * qd[4]
    local alphaCos = qr[1]
    local alpha2 = alphaCos * alphaCos + alphaSin2
+
+   if alphaSin2 == 0 then
+      return alpha2, excess, 0
+   end
 
    local alphaSin = math.sqrt(alphaSin2)
 
@@ -92,14 +101,16 @@ local function split(self)
 
    local l = {qr[2] / alphaSin, qr[3] / alphaSin, qr[4] / alphaSin}
 
-   local d2 = -qd[1] / alphaSin
+   local coeff2 = excess / alpha2
+   local d2 = -(qd[1] - qr[1] * coeff2) / alphaSin
 
-   local coeff = alphaCos * qd[1] / alphaSin2
-   local m = {qd[2] / alphaSin + l[1] * coeff,
-	      qd[3] / alphaSin + l[2] * coeff,
-	      qd[4] / alphaSin + l[3] * coeff}
+   local coeff = alphaCos * (qd[1] - qr[1] * coeff2) / alphaSin2
+   local m = {
+      (qd[2] - qr[2] * coeff2) / alphaSin + l[1] * coeff,
+      (qd[3] - qr[3] * coeff2) / alphaSin + l[2] * coeff,
+      (qd[4] - qr[4] * coeff2) / alphaSin + l[3] * coeff}
 
-   return omega, l, d2, m, alpha2
+   return alpha2, excess, omega, l, d2, m
 end
 
 local function transform(self, x)

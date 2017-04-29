@@ -33,11 +33,13 @@ function mt.__div(self, rhs)
 end
 
 function mt.__pow(self, t)
+   -- does work as well even if it is not a unit
    local alphaCos = self[1]
    local alphaSin2 = self[2] * self[2] + self[3] * self[3] + self[4] * self[4]
 
    if alphaSin2 == 0 then
       -- this is just a real number
+      -- not working for negative numbers
       return M.new(alphaCos ^ t, 0, 0, 0)
    else
       local alphaSin = math.sqrt(alphaSin2)
