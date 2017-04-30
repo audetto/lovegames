@@ -39,6 +39,7 @@ function mt.__pow(self, t)
    if omega == 0 then
       local qr = self[1] ^ t
       local qd = self[2] * t
+      -- if alpha2 == 0 this formula is wrong
       local coeff = (excess / alpha2) * t
 
       qd[1] = qd[1] + coeff * (qr[1] - self[1][1])

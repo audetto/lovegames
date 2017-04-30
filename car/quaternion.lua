@@ -37,23 +37,26 @@ function mt.__pow(self, t)
    local alphaCos = self[1]
    local alphaSin2 = self[2] * self[2] + self[3] * self[3] + self[4] * self[4]
 
-   if alphaSin2 == 0 then
-      -- this is just a real number
-      -- not working for negative numbers
-      return M.new(alphaCos ^ t, 0, 0, 0)
+   local alphaSin = math.sqrt(alphaSin2)
+   local omega = math.atan2(alphaSin, alphaCos) -- omega = theta / 2
+
+   local alpha2 = alphaCos * alphaCos + alphaSin2
+   local powOmega = omega * t
+   local powAlpha = alpha2 ^ (t / 2)
+
+   local l
+
+   if alphaSin == 0 then
+      -- arbitrary choice
+      l = {1, 0, 0}
    else
-      local alphaSin = math.sqrt(alphaSin2)
-      local omega = math.atan2(alphaSin, alphaCos) -- omega = theta / 2
-
-      local alpha2 = alphaCos * alphaCos + alphaSin2
-      local powOmega = omega * t
-      local powAlpha = alpha2 ^ (t / 2)
-
-      local coeff = powAlpha * math.sin(powOmega) / alphaSin
-
-      local powAlphaCos = powAlpha * math.cos(powOmega)
-      return M.new(powAlphaCos, self[2] * coeff, self[3] * coeff, self[4] * coeff)
+      l = {self[2] / alphaSin, self[3] / alphaSin, self[4] / alphaSin}
    end
+
+   local powAlphaCos = powAlpha * math.cos(powOmega)
+   local powAlphaSin = powAlpha * math.sin(powOmega)
+   return M.new(powAlphaCos, l[1] * powAlphaSin, l[2] * powAlphaSin, l[3] * powAlphaSin)
+
 end
 
 local function mul(self, rhs)
