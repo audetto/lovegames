@@ -33,40 +33,89 @@ function mt.__div(self, rhs)
 end
 
 function mt.__pow(self, t)
+   -- inspired from
+   -- https://svn.artisynth.org/svn/artisynth_core/trunk/src/maspack/matrix/DualQuaternion.java
+   -- plus corrections and excess
+
    -- does work as well even if it is not a unit
-   local alpha2, excess, omega, l, d2, m = self:split()
+   local alpha2, relativeExcess, omega, l, d2, m = self:split()
 
-   if omega == 0 then
-      local qr = self[1] ^ t
-      local qd = self[2] * t
-      -- if alpha2 == 0 this formula is wrong
-      local coeff = (excess / alpha2) * t
+   local powOmega = omega * t
+   local powD2 = d2 * t
+   local powAlpha = alpha2 ^ (t / 2)
 
-      qd[1] = qd[1] + coeff * (qr[1] - self[1][1])
-      qd[2] = qd[2] + coeff * (qr[2] - self[1][2])
-      qd[3] = qd[3] + coeff * (qr[3] - self[1][3])
-      qd[4] = qd[4] + coeff * (qr[4] - self[1][4])
+   local c = powAlpha * math.cos(powOmega)
+   local s = powAlpha * math.sin(powOmega)
 
-      return M.new(qr, qd)
+   local coeff = relativeExcess * t
+
+   local qr = quaternion.new(c, s * l[1], s * l[2], s * l[3])
+   local qd = quaternion.new(
+	 -powD2 * s + qr[1] * coeff,
+      powD2 * c * l[1] + s * m[1] + qr[2] * coeff,
+      powD2 * c * l[2] + s * m[2] + qr[3] * coeff,
+      powD2 * c * l[3] + s * m[3] + qr[4] * coeff)
+
+   return M.new(qr, qd)
+end
+
+local function split(self)
+   local qr = self[1]
+   local qd = self[2]
+
+   local alphaSin2 = qr[2] * qr[2] + qr[3] * qr[3] + qr[4] * qr[4]
+   local excess = qr[1] * qd[1] + qr[2] * qd[2] + qr[3] * qd[3] + qr[4] * qd[4]
+   local alphaCos = qr[1]
+   local alpha2 = alphaCos * alphaCos + alphaSin2
+
+   if alpha2 == 0 then
+      -- it is a ZERO
+      -- how do we handle it?
+      return
+   end
+
+   local relativeExcess = excess / alpha2
+
+   -- excess-normalised dual quaternion
+   local qdn = {qd[1] - qr[1] * relativeExcess,
+		qd[2] - qr[2] * relativeExcess,
+		qd[3] - qr[3] * relativeExcess,
+		qd[4] - qr[4] * relativeExcess}
+
+   if alphaSin2 == 0 then
+      local alphaD2Cos = math.sqrt(qdn[2] * qdn[2] + qdn[3] * qdn[3] + qdn[4] * qdn[4])
+      local d2 = alphaD2Cos / alphaCos -- same sign as alphaCos
+
+      local l
+      if alphaD2Cos == 0 then
+	 l = {1, 0, 0} -- l must have norm 1, arbitrary
+      else
+	 l = {qdn[2] / alphaD2Cos, qdn[3] / alphaD2Cos, qdn[4] / alphaD2Cos}
+      end
+
+      -- arbitrary m, s.t. dot(l, m) = 0
+      -- alternative: {l[2] - l[3], l[3] - l[1], l[1] - l[2]}
+      local m = {0, 0, 0}
+      local omega = math.atan2(0, alphaCos)
+
+      return alpha2, relativeExcess, omega, l, d2, m
    else
-      local powOmega = omega * t
-      local powD2 = d2 * t
-      local powAlpha = alpha2 ^ (t / 2)
 
-      local c = powAlpha * math.cos(powOmega)
-      local s = powAlpha * math.sin(powOmega)
+      local alphaSin = math.sqrt(alphaSin2)
 
-      local coeff = (excess / alpha2) * t
+      local omega = math.atan2(alphaSin, alphaCos) -- omega = theta / 2
 
-      local qr = quaternion.new(c, s * l[1], s * l[2], s * l[3])
-      local qd = quaternion.new(
-	    -powD2 * s + qr[1] * coeff,
-	 powD2 * c * l[1] + s * m[1] + qr[2] * coeff,
-	 powD2 * c * l[2] + s * m[2] + qr[3] * coeff,
-	 powD2 * c * l[3] + s * m[3] + qr[4] * coeff)
-      print(qr[2] * coeff)
+      local l = {qr[2] / alphaSin, qr[3] / alphaSin, qr[4] / alphaSin}
 
-      return M.new(qr, qd)
+      local d2 = -qdn[1] / alphaSin
+
+      local coeff = alphaCos * qdn[1] / alphaSin2
+      local m = {
+	 qdn[2] / alphaSin + l[1] * coeff,
+	 qdn[3] / alphaSin + l[2] * coeff,
+	 qdn[4] / alphaSin + l[3] * coeff}
+
+      return alpha2, relativeExcess, omega, l, d2, m
    end
 end
 
@@ -81,37 +130,6 @@ end
 local function norm(self)
    local a = self * self:conj()
    return math.sqrt(a[1][1])
-end
-
-local function split(self)
-   local qr = self[1]
-   local qd = self[2]
-
-   local alphaSin2 = qr[2] * qr[2] + qr[3] * qr[3] + qr[4] * qr[4]
-   local excess = qr[1] * qd[1] + qr[2] * qd[2] + qr[3] * qd[3] + qr[4] * qd[4]
-   local alphaCos = qr[1]
-   local alpha2 = alphaCos * alphaCos + alphaSin2
-
-   if alphaSin2 == 0 then
-      return alpha2, excess, 0
-   end
-
-   local alphaSin = math.sqrt(alphaSin2)
-
-   local omega = math.atan2(alphaSin, alphaCos) -- omega = theta / 2
-
-   local l = {qr[2] / alphaSin, qr[3] / alphaSin, qr[4] / alphaSin}
-
-   local coeff2 = excess / alpha2
-   local d2 = -(qd[1] - qr[1] * coeff2) / alphaSin
-
-   local coeff = alphaCos * (qd[1] - qr[1] * coeff2) / alphaSin2
-   local m = {
-      (qd[2] - qr[2] * coeff2) / alphaSin + l[1] * coeff,
-      (qd[3] - qr[3] * coeff2) / alphaSin + l[2] * coeff,
-      (qd[4] - qr[4] * coeff2) / alphaSin + l[3] * coeff}
-
-   return alpha2, excess, omega, l, d2, m
 end
 
 local function transform(self, x)
