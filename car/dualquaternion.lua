@@ -12,6 +12,10 @@ function mt.__tostring(self)
    return "R: " .. qr .. ", D: " .. qd
 end
 
+function mt.__unm(self)
+   return M.new(-self[1], -self[2])
+end
+
 function mt.__add(self, rhs)
    return M.new(self[1] + rhs[1], self[2] + rhs[2])
 end
