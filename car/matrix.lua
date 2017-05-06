@@ -125,6 +125,7 @@ local function new(x)
 
    x.column = column
    x.inverse = inverse
+   x.transform = mulmv
 
    return x
 end

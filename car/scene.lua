@@ -101,7 +101,6 @@ local function scale(self, ...)
    local current = self.transformation
 
    self.transformation = matrix.diag(...)
-   self.transformation.transform = matrix.mulmv
 
    self:apply()
 
