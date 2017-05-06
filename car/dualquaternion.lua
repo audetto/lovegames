@@ -1,5 +1,6 @@
 local quaternion = require("quaternion")
 local vector = require("vector")
+local matrix = require("matrix")
 
 local M = {}
 
@@ -136,7 +137,33 @@ local function norm(self)
    return math.sqrt(a[1][1])
 end
 
-local function transform(self, x)
+local function equivalent(self)
+   local Aa2 = self[1][1] ^ 2
+   local Ax2 = self[1][2] ^ 2
+   local Ay2 = self[1][3] ^ 2
+   local Az2 = self[1][4] ^ 2
+
+   local t1 = 2 * (-self[2][1] * self[1][2] + self[2][4] * self[1][3] - self[2][3] * self[1][4] + self[2][2] * self[1][1])
+   local t2 = 2 * (-self[2][4] * self[1][2] - self[2][1] * self[1][3] + self[2][2] * self[1][4] + self[2][3] * self[1][1])
+   local t3 = 2 * ( self[2][3] * self[1][2] - self[2][2] * self[1][3] - self[2][1] * self[1][4] + self[2][4] * self[1][1])
+
+   local m = matrix.new({
+	 {Ax2 - Ay2 - Az2 + Aa2, 2 * (self[1][3] * self[1][2] - self[1][1] * self[1][4]), 2 * (self[1][2] * self[1][4] + self[1][3] * self[1][1]), t1},
+	 {2 * (self[1][2] * self[1][3] + self[1][4] * self[1][1]), -Ax2 + Ay2 - Az2 + Aa2, 2 * (-self[1][2] * self[1][1] + self[1][4] * self[1][3]), t2},
+	 {2 * (self[1][2] * self[1][4] - self[1][3] * self[1][1]), 2 * (self[1][2] * self[1][1] + self[1][4] * self[1][3]), -Ax2 - Ay2 + Az2 + Aa2, t3},
+	 {0, 0, 0, 1}
+   })
+   return m
+end
+
+local function transform_matrix(self, x)
+   if self.matrix == nil then
+      self.matrix = self:equivalent()
+   end
+   return self.matrix:transform(x)
+end
+
+local function transform_hamilton(self, x)
    if x[4] == 0 then
       return self[1]:transform(x)
    else
@@ -166,7 +193,9 @@ local function new(qr, qd)
    d.conj = conj
    d.conj3 = conj3
    d.split = split
-   d.transform = transform
+   d.transform = transform_matrix
+   d.equivalent = equivalent
+   d.matrix = nil
 
    return d
 end
